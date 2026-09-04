@@ -1,0 +1,16 @@
+distance_m,rssi_dbm,pass_index,ap_id,board_model,chip_model,antenna_type,antenna_id,antenna_orientation,channel,bandwidth_mhz,phy_mode,receiver_height_cm,transmitter_height_cm,environment_label,trial_label
+0.5,-32.2,1,ap-main,REPLACE_WITH_EXACT_BOARD_MARKING,REPLACE_WITH_EXACT_CHIP,pcb_trace,onboard-antenna-1,fixed_yaw_pitch_roll_zero,6,20,REPLACE_WITH_OBSERVED_PHY,100,100,controlled_empty_space,open_space_sweep
+1.0,-38.2,1,ap-main,REPLACE_WITH_EXACT_BOARD_MARKING,REPLACE_WITH_EXACT_CHIP,pcb_trace,onboard-antenna-1,fixed_yaw_pitch_roll_zero,6,20,REPLACE_WITH_OBSERVED_PHY,100,100,controlled_empty_space,open_space_sweep
+2.0,-44.3,1,ap-main,REPLACE_WITH_EXACT_BOARD_MARKING,REPLACE_WITH_EXACT_CHIP,pcb_trace,onboard-antenna-1,fixed_yaw_pitch_roll_zero,6,20,REPLACE_WITH_OBSERVED_PHY,100,100,controlled_empty_space,open_space_sweep
+4.0,-50.1,1,ap-main,REPLACE_WITH_EXACT_BOARD_MARKING,REPLACE_WITH_EXACT_CHIP,pcb_trace,onboard-antenna-1,fixed_yaw_pitch_roll_zero,6,20,REPLACE_WITH_OBSERVED_PHY,100,100,controlled_empty_space,open_space_sweep
+8.0,-56.2,1,ap-main,REPLACE_WITH_EXACT_BOARD_MARKING,REPLACE_WITH_EXACT_CHIP,pcb_trace,onboard-antenna-1,fixed_yaw_pitch_roll_zero,6,20,REPLACE_WITH_OBSERVED_PHY,100,100,controlled_empty_space,open_space_sweep
+0.5,-31.9,2,ap-main,REPLACE_WITH_EXACT_BOARD_MARKING,REPLACE_WITH_EXACT_CHIP,pcb_trace,onboard-antenna-1,fixed_yaw_pitch_roll_zero,6,20,REPLACE_WITH_OBSERVED_PHY,100,100,controlled_empty_space,open_space_sweep
+1.0,-37.9,2,ap-main,REPLACE_WITH_EXACT_BOARD_MARKING,REPLACE_WITH_EXACT_CHIP,pcb_trace,onboard-antenna-1,fixed_yaw_pitch_roll_zero,6,20,REPLACE_WITH_OBSERVED_PHY,100,100,controlled_empty_space,open_space_sweep
+2.0,-44.0,2,ap-main,REPLACE_WITH_EXACT_BOARD_MARKING,REPLACE_WITH_EXACT_CHIP,pcb_trace,onboard-antenna-1,fixed_yaw_pitch_roll_zero,6,20,REPLACE_WITH_OBSERVED_PHY,100,100,controlled_empty_space,open_space_sweep
+4.0,-49.9,2,ap-main,REPLACE_WITH_EXACT_BOARD_MARKING,REPLACE_WITH_EXACT_CHIP,pcb_trace,onboard-antenna-1,fixed_yaw_pitch_roll_zero,6,20,REPLACE_WITH_OBSERVED_PHY,100,100,controlled_empty_space,open_space_sweep
+8.0,-56.0,2,ap-main,REPLACE_WITH_EXACT_BOARD_MARKING,REPLACE_WITH_EXACT_CHIP,pcb_trace,onboard-antenna-1,fixed_yaw_pitch_roll_zero,6,20,REPLACE_WITH_OBSERVED_PHY,100,100,controlled_empty_space,open_space_sweep
+0.5,-31.7,3,ap-main,REPLACE_WITH_EXACT_BOARD_MARKING,REPLACE_WITH_EXACT_CHIP,pcb_trace,onboard-antenna-1,fixed_yaw_pitch_roll_zero,6,20,REPLACE_WITH_OBSERVED_PHY,100,100,controlled_empty_space,open_space_sweep
+1.0,-37.7,3,ap-main,REPLACE_WITH_EXACT_BOARD_MARKING,REPLACE_WITH_EXACT_CHIP,pcb_trace,onboard-antenna-1,fixed_yaw_pitch_roll_zero,6,20,REPLACE_WITH_OBSERVED_PHY,100,100,controlled_empty_space,open_space_sweep
+2.0,-43.8,3,ap-main,REPLACE_WITH_EXACT_BOARD_MARKING,REPLACE_WITH_EXACT_CHIP,pcb_trace,onboard-antenna-1,fixed_yaw_pitch_roll_zero,6,20,REPLACE_WITH_OBSERVED_PHY,100,100,controlled_empty_space,open_space_sweep
+4.0,-49.7,3,ap-main,REPLACE_WITH_EXACT_BOARD_MARKING,REPLACE_WITH_EXACT_CHIP,pcb_trace,onboard-antenna-1,fixed_yaw_pitch_roll_zero,6,20,REPLACE_WITH_OBSERVED_PHY,100,100,controlled_empty_space,open_space_sweep
+8.0,-55.8,3,ap-main,REPLACE_WITH_EXACT_BOARD_MARKING,REPLACE_WITH_EXACT_CHIP,pcb_trace,onboard-antenna-1,fixed_yaw_pitch_roll_zero,6,20,REPLACE_WITH_OBSERVED_PHY,100,100,controlled_empty_space,open_space_sweep

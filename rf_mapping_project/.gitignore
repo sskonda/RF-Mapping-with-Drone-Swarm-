@@ -1,0 +1,9 @@
+esp32_rssi_mapper/wifi_credentials.h
+.venv/
+.coverage
+.pytest_cache/
+__pycache__/
+*.py[cod]
+inference_output/
+synthetic_output/
+smoke_output/

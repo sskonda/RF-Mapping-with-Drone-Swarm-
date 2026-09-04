@@ -1,0 +1,28 @@
+{
+  "hardware": {
+    "antenna_id": "onboard-antenna-1",
+    "antenna_orientation": "fixed_yaw_pitch_roll_zero",
+    "antenna_type": "pcb_trace",
+    "board_model": "REPLACE_WITH_EXACT_BOARD_MARKING",
+    "chip_model": "REPLACE_WITH_EXACT_CHIP",
+    "orientation_convention": "yaw=0 points the PCB antenna toward +x; right-handed yaw/pitch/roll"
+  },
+  "channel": {
+    "bandwidth_mhz": 20,
+    "bssid_hash": "REPLACE_WITH_STABLE_PRIVACY_PRESERVING_HASH_OR_REMOVE",
+    "channel": 6,
+    "phy_mode": "REPLACE_WITH_OBSERVED_PHY_MODE"
+  },
+  "pose": {
+    "orientation_standard_deviation_deg": [2.0, 2.0, 2.0],
+    "position_standard_deviation_cm": [1.0, 1.0, 1.0]
+  },
+  "environment": {
+    "environment_label": "controlled_room_a",
+    "notes": "Record people, doors, furniture, antenna fixture, and material state here.",
+    "trial_label": "empty_room_baseline"
+  },
+  "measurement": {
+    "operator_note": "Board held in a nonconductive fixture with fixed orientation."
+  }
+}

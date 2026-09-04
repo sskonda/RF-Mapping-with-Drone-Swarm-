@@ -12,6 +12,7 @@ constexpr uint32_t SAMPLE_INTERVAL_MS = 100;
 constexpr size_t SAMPLES_PER_POINT = 50;
 constexpr size_t COMMAND_BUFFER_SIZE = 64;
 constexpr int32_t MAX_COORDINATE_CM = 100000;
+constexpr char SSID_PLACEHOLDER[] = "REPLACE_WITH_YOUR_HOTSPOT_NAME";
 constexpr char PASSWORD_PLACEHOLDER[] = "REPLACE_WITH_YOUR_HOTSPOT_PASSWORD";
 
 char commandBuffer[COMMAND_BUFFER_SIZE];
@@ -20,14 +21,13 @@ bool commandOverflow = false;
 
 bool credentialsConfigured() {
   return HOTSPOT_SSID[0] != '\0' &&
+         strcmp(HOTSPOT_SSID, SSID_PLACEHOLDER) != 0 &&
          strcmp(HOTSPOT_PASSWORD, PASSWORD_PLACEHOLDER) != 0;
 }
 
 void printConnectionStatus() {
   Serial.printf(
-    "STATUS,CONNECTED,%s,%s,%ld,%ld\n",
-    WiFi.SSID().c_str(),
-    WiFi.BSSIDstr().c_str(),
+    "STATUS,CONNECTED,%ld,%ld\n",
     static_cast<long>(WiFi.channel()),
     static_cast<long>(WiFi.RSSI())
   );
@@ -43,7 +43,7 @@ bool connectToHotspot() {
     return true;
   }
 
-  Serial.printf("STATUS,CONNECTING,%s\n", HOTSPOT_SSID);
+  Serial.println("STATUS,CONNECTING");
   WiFi.disconnect();
   WiFi.begin(HOTSPOT_SSID, HOTSPOT_PASSWORD);
 

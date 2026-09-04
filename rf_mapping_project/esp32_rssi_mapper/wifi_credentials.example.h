@@ -1,0 +1,4 @@
+#pragma once
+
+constexpr char HOTSPOT_SSID[] = "REPLACE_WITH_YOUR_HOTSPOT_NAME";
+constexpr char HOTSPOT_PASSWORD[] = "REPLACE_WITH_YOUR_HOTSPOT_PASSWORD";
