@@ -22,6 +22,8 @@ package because it is part of the supported simulate CLI and Python API.
 
 [Reports](Reports/) holds repository migration audits. The original reorganization
 report is historical and intentionally retains the paths used at that time.
+The [RF package cleanup verification](Reports/rf_package_cleanup_verification.md)
+records the canonical package migration, preserved files, tests and build checks.
 
 See [CONTRIBUTING.md](../CONTRIBUTING.md) and the
 [operator workflow](../Docs/Design/RF_Mapping/prototype_workflow.md).
