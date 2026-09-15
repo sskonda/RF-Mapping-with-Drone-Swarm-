@@ -1,0 +1,15 @@
+ESP32_Code/RF_Capture/RSSI/esp32_rssi_mapper/wifi_credentials.h
+.venv/
+**/.venv/
+.coverage
+.pytest_cache/
+**/.pytest_cache/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.egg-info/
+inference_output/
+synthetic_output/
+smoke_output/
+calibration/
+survey_output/

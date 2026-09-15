@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "drone-swarm-rf-mapping"
+version = "0.1.0"
+description = "RF-assisted drone-swarm mapping prototype and repository scaffold."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+dependencies = [
+  "matplotlib>=3.8",
+  "numpy>=1.26",
+  "pyserial>=3.5",
+]
+
+[project.scripts]
+rf-mapper = "rf_mapping.cli.rf_mapper:main"
+
+[tool.setuptools.packages.find]
+where = ["Mapping/RF_Mapping"]
+include = ["rf_mapping*"]
