@@ -1,0 +1,18 @@
+BNO055 (accel + gyro)
+Optical flow / LIDAR (indoors height) 
+Camera (2.8V)
+
+----------------------------------------------
+
+BNO055
+9-axis IMU
+3V3 12.3mA input
+
+Optical Flow + LiDAR
+5V 40mA input
+
+SM04B-SRSS-TB connector for MTF-02P
+
+CG0328 dual-camera module
+Camera
+3V3 100mA
