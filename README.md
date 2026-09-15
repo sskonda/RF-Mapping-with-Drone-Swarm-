@@ -10,33 +10,26 @@ The RF layer is auxiliary sensing. Camera, IMU, VIO, SLAM, and flight-safety sys
 python3 -m venv .venv
 . .venv/bin/activate
 python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-python -m unittest discover -s Development/Tests -v
-python rf_mapper.py plot Development/Datasets/examples/survey_output/raw_samples_20260831_184759.csv
+python -m pip install -e ./Mapping/RF_Mapping
+python -m unittest discover -s Development/Tests/RF_Mapping -v
+rf-mapper --help
 ```
 
 The packaged source layout also supports:
 
 ```sh
-python -m compileall -q rf_mapper.py rf_mapping Mapping Development/Tests
-python Mapping/RF_Mapping/rf_mapping/cli/rf_mapper.py --help
+python -m compileall -q rf_mapper.py Mapping/RF_Mapping/src Development/Tests
+python -m rf_mapping.cli.rf_mapper --help
 ```
 
 ## Active Prototype
 
-| Path | Purpose |
-| --- | --- |
-| `Mapping/RF_Mapping/rf_mapping/` | Python RF mapping package: data loading, calibration, inference, field models, observability, occupancy, simulation, and visualization |
-| `Mapping/RF_Mapping/rf_mapping/cli/rf_mapper.py` | CLI implementation |
-| `rf_mapper.py` | Backward-compatible root CLI/import shim |
-| `rf_mapping/` | Compatibility import shim for running from a source checkout without setting `PYTHONPATH` |
-| `ESP32_Code/RF_Capture/RSSI/esp32_rssi_mapper/` | Arduino ESP32 RSSI survey firmware and safe credential template |
-| `Development/Datasets/examples/survey_output/` | Checked-in legacy 3 x 3 measured RSSI survey fixture |
-| `Development/Datasets/examples/acquisition_metadata.example.json` | Acquisition metadata template |
-| `Development/Datasets/calibration/calibration_samples.example.csv` | Open-space calibration example |
-| `Development/Tests/unit/` | Standard-library `unittest` suite |
-| `Docs/Design/prototype_workflow.md` | Detailed RF prototype workflow |
-| `Docs/Architecture/system_overview.md` | Long-form system architecture and research direction |
+The [RF mapping subsystem](Mapping/RF_Mapping/README.md) documents the host
+package, CLI, example plotting and calibration, datasets, and tests. It consumes
+measurements from the [ESP32 acquisition firmware](ESP32_Code/README.md).
+The root `python rf_mapper.py` launcher remains available after installation.
+See the [system architecture](Docs/Architecture/system_overview.md) for how
+these components fit into the complete drone swarm.
 
 ## Repository Layout
 
@@ -52,10 +45,10 @@ python Mapping/RF_Mapping/rf_mapping/cli/rf_mapper.py --help
 | [Docs/](Docs/) | Architecture, design, research, and protocol documentation. |
 
 Only implemented areas and documented planning boundaries have directories.
-The Python package stays together under `Mapping/RF_Mapping/rf_mapping/` to
+The Python package stays together under `Mapping/RF_Mapping/src/rf_mapping/` to
 preserve its public imports, including the existing simulation and visualization
-APIs. Root launchers, Python configuration, and `.github/` retain their
-repository-wide roles.
+APIs. RF Python build metadata lives in `Mapping/RF_Mapping/pyproject.toml`;
+the root test configuration and `.github/` coordinate repository validation.
 
 ## Current Status
 
@@ -78,4 +71,4 @@ Planned:
 - Multi-agent communication and global map fusion
 - 3D RF voxel mapping and base-station dashboards
 
-See [Docs/Design/prototype_workflow.md](Docs/Design/prototype_workflow.md) for the detailed RF workflow and [Docs/Research/CSI_FOLLOW_ON.md](Docs/Research/CSI_FOLLOW_ON.md) for the CSI follow-on design.
+See [Docs/Design/RF_Mapping/prototype_workflow.md](Docs/Design/RF_Mapping/prototype_workflow.md) for the detailed RF workflow and [Docs/Research/RF_Mapping/CSI_FOLLOW_ON.md](Docs/Research/RF_Mapping/CSI_FOLLOW_ON.md) for the CSI follow-on design.

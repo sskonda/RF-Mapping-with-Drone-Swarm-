@@ -50,23 +50,29 @@ hold yaw, pitch, and roll fixed or measure their effects deliberately.
 | --- | --- |
 | `ESP32_Code/RF_Capture/RSSI/esp32_rssi_mapper/esp32_rssi_mapper.ino` | Stable 115200-baud `PING`/`MEASURE,x,y` firmware; 50 RSSI samples at 10 Hz |
 | `ESP32_Code/RF_Capture/RSSI/esp32_rssi_mapper/wifi_credentials.example.h` | Safe credential template |
-| `rf_mapper.py` | Backward-compatible root command-line entry point |
-| `Mapping/RF_Mapping/rf_mapping/cli/rf_mapper.py` | Packaged CLI implementation |
-| `Mapping/RF_Mapping/rf_mapping/artifacts.py` | Deterministic NPZ/JSON serialization and input hashing |
-| `Mapping/RF_Mapping/rf_mapping/data.py` | Strict legacy/v2 loading, metadata checks, per-pass and robust statistics |
-| `Mapping/RF_Mapping/rf_mapping/calibration.py` | Robust log-distance calibration and artifact validation |
-| `Mapping/RF_Mapping/rf_mapping/field_model.py` | Path-loss-mean Gaussian-process residual field |
-| `Mapping/RF_Mapping/rf_mapping/occupancy.py` | Exact 2D ray lengths, nonnegative MAP attenuation, bootstrap evidence |
-| `Mapping/RF_Mapping/rf_mapping/observability.py` | Independent-link, transmitter, angle, conditioning, distance, and pass gates |
-| `Mapping/RF_Mapping/rf_mapping/inference.py` | Auditable end-to-end inference and deterministic outputs |
-| `Mapping/RF_Mapping/rf_mapping/simulation.py` | Deterministic empty/rectangle synthetic experiments and quantitative metrics |
-| `Mapping/RF_Mapping/rf_mapping/visualization.py` | Six-panel audit figure |
-| `Development/Datasets/examples/` | Valid acquisition metadata template and measured survey fixture |
-| `Development/Datasets/calibration/` | Valid calibration CSV template |
-| `Development/Tests/unit/` | Standard-library `unittest` suite |
-| `Docs/Research/CSI_FOLLOW_ON.md` | Board-gated CSI experiment design; no CSI firmware is claimed |
+| `rf_mapper.py` | Backward-compatible root command-line launcher after package installation |
+| `Mapping/RF_Mapping/src/rf_mapping/cli/rf_mapper.py` | Packaged CLI implementation |
+| `Mapping/RF_Mapping/src/rf_mapping/artifacts.py` | Deterministic NPZ/JSON serialization and input hashing |
+| `Mapping/RF_Mapping/src/rf_mapping/data.py` | Strict legacy/v2 loading, metadata checks, per-pass and robust statistics |
+| `Mapping/RF_Mapping/src/rf_mapping/calibration.py` | Robust log-distance calibration and artifact validation |
+| `Mapping/RF_Mapping/src/rf_mapping/field_model.py` | Path-loss-mean Gaussian-process residual field |
+| `Mapping/RF_Mapping/src/rf_mapping/occupancy.py` | Exact 2D ray lengths, nonnegative MAP attenuation, bootstrap evidence |
+| `Mapping/RF_Mapping/src/rf_mapping/observability.py` | Independent-link, transmitter, angle, conditioning, distance, and pass gates |
+| `Mapping/RF_Mapping/src/rf_mapping/inference.py` | Auditable end-to-end inference and deterministic outputs |
+| `Mapping/RF_Mapping/src/rf_mapping/simulation.py` | Deterministic empty/rectangle synthetic experiments and quantitative metrics |
+| `Mapping/RF_Mapping/src/rf_mapping/visualization.py` | Six-panel audit figure |
+| `Development/Datasets/RF_Mapping/Acquisition_Examples/` | Valid acquisition metadata template |
+| `Development/Datasets/RF_Mapping/Measured_Surveys/Legacy_3x3/` | Measured legacy survey fixture |
+| `Development/Datasets/RF_Mapping/Calibration/` | Valid calibration CSV template |
+| `Development/Tests/RF_Mapping/` | Standard-library `unittest` suite |
+| `Docs/Research/RF_Mapping/CSI_FOLLOW_ON.md` | Board-gated CSI experiment design; no CSI firmware is claimed |
 
 No dependency was added beyond NumPy, Matplotlib, and pyserial.
+
+After installation, `rf-mapper` and `python -m rf_mapping.cli.rf_mapper` are
+the canonical CLI invocations. The root `python rf_mapper.py` commands below
+remain equivalent launchers. See the [RF subsystem README](../../../Mapping/RF_Mapping/README.md)
+for packaging and test details.
 
 ## Prerequisites
 
@@ -95,13 +101,13 @@ the checked-in artifacts untouched.
    Set-Location .\RF-Mapping-with-Drone-Swarm-
    py -3.12 -m venv .venv
    .\.venv\Scripts\python.exe -m pip install --upgrade pip
-   .\.venv\Scripts\python.exe -m pip install -r requirements.txt
+   .\.venv\Scripts\python.exe -m pip install -e ./Mapping/RF_Mapping
    ```
 
 2. Run all tests:
 
    ```powershell
-   .\.venv\Scripts\python.exe -m unittest discover -s Development/Tests -v
+   .\.venv\Scripts\python.exe -m unittest discover -s Development/Tests/RF_Mapping -v
    ```
 
 3. Copy the legacy input, render measured data, then run deterministic
@@ -109,7 +115,7 @@ the checked-in artifacts untouched.
 
    ```powershell
    New-Item -ItemType Directory -Force smoke_output | Out-Null
-   Copy-Item .\Development\Datasets\examples\survey_output\raw_samples_20260831_184759.csv .\smoke_output\legacy.csv
+   Copy-Item .\Development\Datasets\RF_Mapping\Measured_Surveys\Legacy_3x3\raw_samples_20260831_184759.csv .\smoke_output\legacy.csv
    .\.venv\Scripts\python.exe rf_mapper.py plot .\smoke_output\legacy.csv
    .\.venv\Scripts\python.exe rf_mapper.py infer .\smoke_output\legacy.csv --grid-resolution-cm 5 --kernel-length-scale-cm 50 --seed 0 --output-dir .\smoke_output\legacy_inference
    ```
@@ -135,10 +141,10 @@ cd RF-Mapping-with-Drone-Swarm-
 python3 -m venv .venv
 . .venv/bin/activate
 python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-python -m unittest discover -s Development/Tests -v
+python -m pip install -e ./Mapping/RF_Mapping
+python -m unittest discover -s Development/Tests/RF_Mapping -v
 mkdir -p smoke_output
-cp Development/Datasets/examples/survey_output/raw_samples_20260831_184759.csv smoke_output/legacy.csv
+cp Development/Datasets/RF_Mapping/Measured_Surveys/Legacy_3x3/raw_samples_20260831_184759.csv smoke_output/legacy.csv
 python rf_mapper.py plot smoke_output/legacy.csv
 python rf_mapper.py infer smoke_output/legacy.csv --grid-resolution-cm 5 --kernel-length-scale-cm 50 --seed 0 --output-dir smoke_output/legacy_inference
 ```
@@ -222,7 +228,7 @@ about +y, and roll about +x in degrees. Keep the PCB antenna orientation fixed.
 Copy and edit the metadata template:
 
 ```powershell
-Copy-Item .\Development\Datasets\examples\acquisition_metadata.example.json .\acquisition_metadata.json
+Copy-Item .\Development\Datasets\RF_Mapping\Acquisition_Examples\acquisition_metadata.example.json .\acquisition_metadata.json
 notepad .\acquisition_metadata.json
 ```
 
@@ -286,7 +292,7 @@ real experiment:
 
 ```powershell
 New-Item -ItemType Directory -Force calibration | Out-Null
-Copy-Item .\Development\Datasets\calibration\calibration_samples.example.csv .\calibration\ap-main_samples.csv
+Copy-Item .\Development\Datasets\RF_Mapping\Calibration\calibration_samples.example.csv .\calibration\ap-main_samples.csv
 notepad .\calibration\ap-main_samples.csv
 .\.venv\Scripts\python.exe rf_mapper.py calibrate .\calibration\ap-main_samples.csv --output .\calibration\ap-main.json
 ```
@@ -295,7 +301,7 @@ POSIX:
 
 ```sh
 mkdir -p calibration
-cp Development/Datasets/calibration/calibration_samples.example.csv calibration/ap-main_samples.csv
+cp Development/Datasets/RF_Mapping/Calibration/calibration_samples.example.csv calibration/ap-main_samples.csv
 ${EDITOR:-vi} calibration/ap-main_samples.csv
 python rf_mapper.py calibrate calibration/ap-main_samples.csv --output calibration/ap-main.json
 ```
@@ -597,8 +603,8 @@ all synthetic APs identical transmit/propagation parameters.
 ## Tests and checked-data smoke commands
 
 ```powershell
-.\.venv\Scripts\python.exe -m unittest discover -s Development/Tests -v
-.\.venv\Scripts\python.exe -m compileall -q rf_mapper.py rf_mapping Mapping Development/Tests
+.\.venv\Scripts\python.exe -m unittest discover -s Development/Tests/RF_Mapping -v
+.\.venv\Scripts\python.exe -m compileall -q rf_mapper.py Mapping/RF_Mapping/src Development/Tests
 ```
 
 The test suite checks exact legacy grouping/statistics, malformed serial/data
@@ -681,7 +687,7 @@ IDs, synchronized clocks, a validated shared-frame transform, and merge only
 after that transform is established. The dock remains the origin/coordinator
 and heavier-compute point.
 
-CSI is intentionally not implemented. Read [the CSI follow-on design](../Research/CSI_FOLLOW_ON.md)
+CSI is intentionally not implemented. Read [the CSI follow-on design](../../Research/RF_Mapping/CSI_FOLLOW_ON.md)
 after supplying the exact board marking/photo and toolchain. One PCB antenna and
 10 Hz scalar RSSI cannot implement RIM, SAR, through-wall imaging, or centimetre
 obstacle mapping.

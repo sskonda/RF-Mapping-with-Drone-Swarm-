@@ -5,11 +5,6 @@ from pathlib import Path
 
 import numpy as np
 
-try:
-    from . import _path as _path
-except ImportError:
-    import _path as _path
-
 from rf_mapping.calibration import load_calibration
 from rf_mapping.data import load_survey_csv
 from rf_mapping.simulation import (

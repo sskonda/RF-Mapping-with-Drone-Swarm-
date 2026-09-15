@@ -7,11 +7,6 @@ from pathlib import Path
 
 import numpy as np
 
-try:
-    from . import _path as _path
-except ImportError:
-    import _path as _path
-
 from rf_mapping.inference import InferenceConfig, run_offline_inference
 from rf_mapping.simulation import SimulationConfig, generate_synthetic_dataset
 
@@ -19,7 +14,7 @@ from rf_mapping.simulation import SimulationConfig, generate_synthetic_dataset
 REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 CHECKED_IN_SURVEY = (
     REPOSITORY_ROOT
-    / "Development/Datasets/examples/survey_output/raw_samples_20260831_184759.csv"
+    / "Development/Datasets/RF_Mapping/Measured_Surveys/Legacy_3x3/raw_samples_20260831_184759.csv"
 )
 
 

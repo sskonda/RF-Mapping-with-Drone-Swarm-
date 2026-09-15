@@ -9,11 +9,6 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-try:
-    from . import _path as _path
-except ImportError:
-    import _path as _path
-
 from rf_mapping.visualization import save_inference_figure
 
 

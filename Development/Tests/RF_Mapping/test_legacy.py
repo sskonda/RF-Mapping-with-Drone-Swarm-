@@ -8,12 +8,12 @@ import matplotlib
 
 matplotlib.use("Agg")
 
-import rf_mapper
+from rf_mapping.cli import rf_mapper
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 LEGACY_RAW = (
-    PROJECT_ROOT / "Development/Datasets/examples/survey_output/raw_samples_20260831_184759.csv"
+    PROJECT_ROOT / "Development/Datasets/RF_Mapping/Measured_Surveys/Legacy_3x3/raw_samples_20260831_184759.csv"
 )
 
 

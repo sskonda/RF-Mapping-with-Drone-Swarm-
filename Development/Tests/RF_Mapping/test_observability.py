@@ -2,11 +2,6 @@ import unittest
 
 import numpy as np
 
-try:
-    from . import _path as _path
-except ImportError:
-    import _path as _path
-
 from rf_mapping.observability import (
     ObservabilityConfig,
     calculate_support,

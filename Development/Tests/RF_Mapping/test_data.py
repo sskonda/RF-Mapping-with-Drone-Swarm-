@@ -8,11 +8,6 @@ import uuid
 import warnings
 from pathlib import Path
 
-try:
-    from . import _path as _path
-except ImportError:
-    import _path as _path
-
 from rf_mapping.data import (
     LEGACY_CSV_FIELDS,
     V2_CSV_FIELDS,
@@ -28,7 +23,7 @@ from rf_mapping.data import (
 REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 CHECKED_IN_SURVEY = (
     REPOSITORY_ROOT
-    / "Development/Datasets/examples/survey_output/raw_samples_20260831_184759.csv"
+    / "Development/Datasets/RF_Mapping/Measured_Surveys/Legacy_3x3/raw_samples_20260831_184759.csv"
 )
 
 

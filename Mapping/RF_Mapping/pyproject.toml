@@ -19,5 +19,5 @@ dependencies = [
 rf-mapper = "rf_mapping.cli.rf_mapper:main"
 
 [tool.setuptools.packages.find]
-where = ["Mapping/RF_Mapping"]
+where = ["src"]
 include = ["rf_mapping*"]

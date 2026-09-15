@@ -9,7 +9,7 @@ The long-term system is intended to produce two complementary representations of
 
 The RF system is an additional sensing layer. It is **not** intended to replace cameras, IMUs, VIO, SLAM, or other collision-critical geometric sensing.
 
-The current working implementation is in [`Mapping/RF_Mapping/rf_mapping`](../../Mapping/RF_Mapping/rf_mapping), with the operator workflow in [`Docs/Design/prototype_workflow.md`](../Design/prototype_workflow.md).
+The current working implementation is in [`Mapping/RF_Mapping/src/rf_mapping`](../../Mapping/RF_Mapping/src/rf_mapping), with the operator workflow in [`Docs/Design/RF_Mapping/prototype_workflow.md`](../Design/RF_Mapping/prototype_workflow.md).
 
 ---
 
@@ -74,7 +74,7 @@ The current software extends that baseline with:
 
 The complete setup, calibration, collection, inference, validation, and troubleshooting workflow is documented in:
 
-[`Docs/Design/prototype_workflow.md`](../Design/prototype_workflow.md)
+[`Docs/Design/RF_Mapping/prototype_workflow.md`](../Design/RF_Mapping/prototype_workflow.md)
 
 ---
 
@@ -498,7 +498,7 @@ CSI is a major planned research direction, but it must remain separate from the 
 
 The proposed first CSI experiment is documented in:
 
-[`Docs/Research/CSI_FOLLOW_ON.md`](../Research/CSI_FOLLOW_ON.md)
+[`Docs/Research/RF_Mapping/CSI_FOLLOW_ON.md`](../Research/RF_Mapping/CSI_FOLLOW_ON.md)
 
 The initial CSI goal is **not obstacle imaging**.
 
@@ -776,23 +776,28 @@ RF-Mapping-with-Drone-Swarm-/
 │   └── RF_Capture/RSSI/esp32_rssi_mapper/
 ├── Autonomy/
 ├── Mapping/
-│   └── RF_Mapping/rf_mapping/
+│   └── RF_Mapping/
+│       ├── README.md
+│       ├── pyproject.toml
+│       └── src/rf_mapping/
 ├── Swarm/
 ├── FPGA/
 ├── Development/
-│   ├── Tests/unit/
-│   └── Datasets/
-│       ├── examples/
-│       └── calibration/
+│   ├── Tests/RF_Mapping/
+│   ├── Reports/
+│   └── Datasets/RF_Mapping/
+│       ├── Acquisition_Examples/
+│       ├── Calibration/
+│       └── Measured_Surveys/Legacy_3x3/
 └── Docs/
     ├── Architecture/
-    ├── Design/
-    └── Research/
+    ├── Design/RF_Mapping/
+    └── Research/RF_Mapping/
 ```
 
 For installation, firmware configuration, data collection, calibration, inference commands, simulation, validation, and troubleshooting, see:
 
-## [`Docs/Design/prototype_workflow.md`](../Design/prototype_workflow.md)
+## [`Docs/Design/RF_Mapping/prototype_workflow.md`](../Design/RF_Mapping/prototype_workflow.md)
 
 ---
 

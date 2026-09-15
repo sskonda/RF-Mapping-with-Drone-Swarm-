@@ -7,9 +7,9 @@ The implemented [RSSI sketch](RF_Capture/RSSI/esp32_rssi_mapper/) connects to a
 sketch directory named esp32_rssi_mapper so Arduino recognizes its matching
 esp32_rssi_mapper.ino file. The local wifi_credentials.h must remain beside it.
 
-Follow the [firmware setup and serial workflow](../Docs/Design/prototype_workflow.md).
+Follow the [firmware setup and serial workflow](../Docs/Design/RF_Mapping/prototype_workflow.md).
 The exact board target is still unresolved. CSI is described in the
-[follow-on research](../Docs/Research/CSI_FOLLOW_ON.md).
+[follow-on research](../Docs/Research/RF_Mapping/CSI_FOLLOW_ON.md).
 
 Future flight-controller code belongs in Autonomy/Flight_Controller; navigation
 interfaces, RF capture, communications, sensor drivers, and shared utilities

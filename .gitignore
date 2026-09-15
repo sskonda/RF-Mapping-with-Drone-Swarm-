@@ -8,6 +8,8 @@ __pycache__/
 **/__pycache__/
 *.py[cod]
 *.egg-info/
+Mapping/RF_Mapping/build/
+Mapping/RF_Mapping/dist/
 inference_output/
 synthetic_output/
 smoke_output/

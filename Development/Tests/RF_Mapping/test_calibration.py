@@ -5,11 +5,6 @@ import tempfile
 import unittest
 from pathlib import Path
 
-try:
-    from . import _path as _path
-except ImportError:
-    import _path as _path
-
 from rf_mapping.calibration import (
     fit_log_distance_calibration,
     load_calibration,
@@ -22,7 +17,7 @@ class CalibrationTests(unittest.TestCase):
     def test_documented_example_is_valid_and_recoverable(self) -> None:
         example_path = (
             Path(__file__).resolve().parents[3]
-            / "Development/Datasets/calibration/calibration_samples.example.csv"
+            / "Development/Datasets/RF_Mapping/Calibration/calibration_samples.example.csv"
         )
         result = fit_log_distance_calibration(load_calibration_csv(example_path))
         self.assertTrue(result.converged)

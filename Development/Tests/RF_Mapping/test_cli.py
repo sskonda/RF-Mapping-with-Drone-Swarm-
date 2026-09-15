@@ -6,7 +6,7 @@ import unittest
 from argparse import Namespace
 from pathlib import Path
 
-from rf_mapper import (
+from rf_mapping.cli.rf_mapper import (
     _load_acquisition_metadata_config,
     _rich_survey_enabled,
     _write_survey_metadata,
@@ -19,7 +19,7 @@ class CommandLineTests(unittest.TestCase):
     def test_documented_acquisition_metadata_config_is_accepted(self) -> None:
         example_path = (
             Path(__file__).resolve().parents[3]
-            / "Development/Datasets/examples/acquisition_metadata.example.json"
+            / "Development/Datasets/RF_Mapping/Acquisition_Examples/acquisition_metadata.example.json"
         )
         config = _load_acquisition_metadata_config(str(example_path))
         self.assertEqual(config["hardware"]["antenna_type"], "pcb_trace")

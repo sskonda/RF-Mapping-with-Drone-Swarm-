@@ -14,12 +14,6 @@ from pathlib import Path
 from typing import Any
 
 
-if __package__ in {None, ""}:
-    software_root = Path(__file__).resolve().parents[2]
-    software_path = str(software_root)
-    if software_path not in sys.path:
-        sys.path.insert(0, software_path)
-
 import matplotlib.pyplot as plt
 import numpy as np
 import serial
