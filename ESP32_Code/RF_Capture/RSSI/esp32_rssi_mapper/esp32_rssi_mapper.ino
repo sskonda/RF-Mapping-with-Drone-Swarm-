@@ -1,3 +1,4 @@
+#include <ArduinoOTA.h>
 #include <WiFi.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -5,6 +6,15 @@
 
 #include "wifi_credentials.h"
 
+constexpr char FIRMWARE_VERSION[] = "1.1.0";
+constexpr char OTA_HOSTNAME[] = "rf-mapper-esp32";
+constexpr uint16_t OTA_PORT = 3232;
+constexpr char OTA_PASSWORD_PLACEHOLDER[] = "REPLACE_WITH_YOUR_OTA_PASSWORD";
+#ifdef OTA_PASSWORD
+constexpr char OTA_PASSWORD_VALUE[] = OTA_PASSWORD;
+#else
+constexpr char OTA_PASSWORD_VALUE[] = "";
+#endif
 constexpr uint32_t SERIAL_BAUD = 115200;
 constexpr uint32_t WIFI_CONNECT_TIMEOUT_MS = 30000;
 constexpr uint32_t WIFI_RETRY_DELAY_MS = 2000;
@@ -18,6 +28,30 @@ constexpr char PASSWORD_PLACEHOLDER[] = "REPLACE_WITH_YOUR_HOTSPOT_PASSWORD";
 char commandBuffer[COMMAND_BUFFER_SIZE];
 size_t commandLength = 0;
 bool commandOverflow = false;
+bool otaStarted = false;
+
+bool otaCredentialsConfigured() {
+  return OTA_PASSWORD_VALUE[0] != '\0' &&
+         strcmp(OTA_PASSWORD_VALUE, OTA_PASSWORD_PLACEHOLDER) != 0;
+}
+
+void startOTA() {
+  if (otaStarted || !otaCredentialsConfigured()) {
+    return;
+  }
+
+  ArduinoOTA.setHostname(OTA_HOSTNAME);
+  ArduinoOTA.setPort(OTA_PORT);
+  ArduinoOTA.setPassword(OTA_PASSWORD_VALUE);
+  ArduinoOTA.onStart([]() { Serial.println("STATUS,OTA_START"); });
+  ArduinoOTA.onEnd([]() { Serial.println("STATUS,OTA_END"); });
+  ArduinoOTA.onError([](ota_error_t error) {
+    Serial.printf("ERROR,OTA,%u\n", static_cast<unsigned>(error));
+  });
+  ArduinoOTA.begin();
+  otaStarted = true;
+  Serial.printf("STATUS,OTA_ENABLED,%s,%u\n", OTA_HOSTNAME, OTA_PORT);
+}
 
 bool credentialsConfigured() {
   return HOTSPOT_SSID[0] != '\0' &&
@@ -191,6 +225,10 @@ void handleCommand() {
 void setup() {
   Serial.begin(SERIAL_BAUD);
   delay(WIFI_RETRY_DELAY_MS);
+  Serial.printf("STATUS,FIRMWARE,%s\n", FIRMWARE_VERSION);
+  if (!otaCredentialsConfigured()) {
+    Serial.println("STATUS,OTA_DISABLED,SET_OTA_PASSWORD");
+  }
 
   WiFi.mode(WIFI_STA);
   WiFi.setSleep(false);
@@ -201,6 +239,10 @@ void setup() {
 
 void loop() {
   if (WiFi.status() != WL_CONNECTED) {
+    if (otaStarted) {
+      ArduinoOTA.end();
+      otaStarted = false;
+    }
     delay(WIFI_RETRY_DELAY_MS);
     connectToHotspot();
     return;
@@ -208,5 +250,10 @@ void loop() {
 
   if (readCommandLine()) {
     handleCommand();
+  } else {
+    startOTA();
+    if (otaStarted) {
+      ArduinoOTA.handle();
+    }
   }
 }

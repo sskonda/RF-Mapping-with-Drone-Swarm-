@@ -1,4 +1,7 @@
 ESP32_Code/RF_Capture/RSSI/esp32_rssi_mapper/wifi_credentials.h
+ESP32_Code/RF_Capture/RSSI/esp32_rssi_mapper/build/
+ESP32_Code/RF_Capture/RSSI/esp32_rssi_mapper/*.bin
+ESP32_Code/RF_Capture/RSSI/esp32_rssi_mapper/*.elf
 .venv/
 **/.venv/
 .coverage

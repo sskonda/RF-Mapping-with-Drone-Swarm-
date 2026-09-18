@@ -167,7 +167,7 @@ header. Purging the old value from Git history is a separate destructive
 history rewrite requiring explicit approval and coordinated force-push; this
 project does not perform it automatically.
 
-Create the local ignored header on Windows:
+Create the local ignored header only if it does not already exist. On Windows:
 
 ```powershell
 Copy-Item .\ESP32_Code\RF_Capture\RSSI\esp32_rssi_mapper\wifi_credentials.example.h .\ESP32_Code\RF_Capture\RSSI\esp32_rssi_mapper\wifi_credentials.h
@@ -183,13 +183,19 @@ ${EDITOR:-vi} ESP32_Code/RF_Capture/RSSI/esp32_rssi_mapper/wifi_credentials.h
 git check-ignore ESP32_Code/RF_Capture/RSSI/esp32_rssi_mapper/wifi_credentials.h
 ```
 
-Replace only `REPLACE_WITH_YOUR_HOTSPOT_NAME` and
-`REPLACE_WITH_YOUR_HOTSPOT_PASSWORD`. Never put either value in a dataset,
-metadata file, command line, log, issue, or commit. `git check-ignore` should
+Replace `REPLACE_WITH_YOUR_HOTSPOT_NAME`, `REPLACE_WITH_YOUR_HOTSPOT_PASSWORD`, and
+`REPLACE_WITH_YOUR_OTA_PASSWORD` in the local header. Never put these values in a
+dataset, metadata file, command line, log, issue, or commit. `git check-ignore` should
 print `ESP32_Code/RF_Capture/RSSI/esp32_rssi_mapper/wifi_credentials.h`, confirming that the real file is
 ignored.
 
 ### Upload and serial check
+
+Use USB for the first flash and recovery; use ArduinoOTA over Wi-Fi for normal
+subsequent firmware uploads. Follow the [ESP32 operator guide](../../../ESP32_Code/README.md)
+for OTA-capable partitions, password setup, exact IDE/network-port steps,
+direct-IP fallback, version verification, and the production-security boundary.
+The board selection below still requires identification of the physical hardware.
 
 1. Read the exact board marking or provide a clear front/back photo. In Arduino
    IDE Boards Manager, install **esp32 by Espressif Systems**.
@@ -199,7 +205,9 @@ ignored.
 4. Connect the data USB cable. In Windows Device Manager, expand **Ports (COM &
    LPT)** and note the port that appears, for example `[YOUR_COM_PORT] = COM5`.
    Choose it under **Tools > Port**.
-5. Leave upload speed at the selected board package's supported default and
+5. Select an OTA-capable partition scheme with `otadata`, `ota_0`, and `ota_1`,
+   each app slot large enough for the firmware, as detailed in the operator guide.
+   Leave upload speed at the selected board package's supported default and
    click **Upload**. Upload baud and application serial baud are separate.
 6. If upload stalls at `Connecting...`, use the board's documented BOOT/RESET
    procedure; for many generic boards, hold **BOOT**, begin upload, then release
@@ -208,9 +216,11 @@ ignored.
 7. Open Serial Monitor at exactly **115200 baud**. A successful startup is:
 
    ```text
+   STATUS,FIRMWARE,1.1.0
    STATUS,CONNECTING
    STATUS,CONNECTED,6,-50
    READY
+   STATUS,OTA_ENABLED,rf-mapper-esp32,3232
    ```
 
    Channel/RSSI values vary; network identifiers are deliberately not printed.
