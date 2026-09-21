@@ -29,3 +29,24 @@ jobs:
         run: |
           rf-mapper --help
           python -m rf_mapping.cli.rf_mapper --help
+
+  flight-host:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test flight bench safety and sensor decoding
+        run: |
+          cmake -S Development/Tests/Flight_Controller -B /tmp/fc-tests -DFC_SANITIZE=ON
+          cmake --build /tmp/fc-tests
+          ctest --test-dir /tmp/fc-tests --output-on-failure
+
+  flight-esp32s3:
+    runs-on: ubuntu-latest
+    container: espressif/idf:v5.5.5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build ESP32-S3 bench firmware
+        shell: bash
+        run: |
+          . /opt/esp/idf/export.sh
+          idf.py -C ESP32_Code/Autonomy/Flight_Controller build

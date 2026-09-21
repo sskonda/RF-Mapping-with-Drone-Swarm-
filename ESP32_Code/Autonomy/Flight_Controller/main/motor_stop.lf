@@ -1,0 +1,4 @@
+[mapping:motor_stop]
+archive: libesp_driver_mcpwm.a
+entries:
+    mcpwm_gen: mcpwm_generator_set_force_level (noflash)

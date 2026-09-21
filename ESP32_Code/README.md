@@ -13,9 +13,9 @@ interfaces are unchanged; OTA does not transport RSSI measurements over Wi-Fi.
 See the [survey workflow](../Docs/Design/RF_Mapping/prototype_workflow.md) for mapping
 and [CSI research](../Docs/Research/RF_Mapping/CSI_FOLLOW_ON.md) for future capture work.
 
-Future flight-controller code belongs in Autonomy/Flight_Controller; navigation
-interfaces, RF capture, communications, sensor drivers, and shared utilities
-should receive directories when implemented.
+The ESP-IDF [flight-controller bench firmware](Autonomy/Flight_Controller/README.md)
+provides sensor bring-up and guarded single-motor tests. It is a separate image
+from this RSSI/OTA sketch; flight and position control are not implemented yet.
 
 ## Board and partition requirements
 
