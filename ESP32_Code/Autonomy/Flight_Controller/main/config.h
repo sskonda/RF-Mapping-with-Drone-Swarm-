@@ -28,6 +28,7 @@
 #define FC_COMMAND_MAX_AGE_US 100000u
 #define FC_IMU_MAX_AGE_US 30000u
 #define FC_FLOW_MAX_AGE_US 60000u
+#define FC_FLOW_FRAME_MAX_US (2u * FC_PERIOD_US)
 #define FC_RANGE_MIN_M 0.08f /* Flow's working floor, above the ToF dead zone. */
 #define FC_RANGE_MAX_M 2.0f /* Provisional bench envelope, not the sensor's rating. */
 #define FC_FLOW_MIN_QUALITY 100 /* Raw units; requires surface characterization. */

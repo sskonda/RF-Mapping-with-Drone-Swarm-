@@ -23,11 +23,12 @@ pending; stopping clears that slot. There is no retrying seqlock or command queu
 
 The flight task uses fixed-size records and bounded UART reads. I2C uses the
 hardware synchronous driver, with a 2 ms timeout per transaction and a 1.5 ms
-clock-stretch limit; error recovery also consumes time. These settings are bench
-limits, not measured BNO055 timing guarantees. Drivers allocate at initialization
-only. No application allocation, printing, filesystem, network or update work
-occurs in the acquisition/output loop. The minimal IDF build includes only the
-required components. There is no OTA service or OTA partition.
+clock-stretch limit. IDF v5.5.5 also has a **50 ms bus-clear recovery timeout**
+(`s_i2c_master_clear_bus`), so 2 ms is not a bound on complete call duration.
+These settings are bench limits, not measured BNO055 timing guarantees. Drivers
+allocate at initialization only. No application allocation, printing, filesystem,
+network or update work occurs in the acquisition/output loop. The minimal IDF
+build includes only the required components. There is no OTA service or OTA partition.
 
 A core-1 GPTimer interrupt forces every PWM generator low when a 30 ms output
 lease expires. Updating/releasing outputs and the timeout ISR share a short
@@ -89,8 +90,13 @@ connecting it. Manufacturer documentation specifies 50 Hz, 115200 baud, 8N1,
 3.3 V UART signaling and a 5 V supply. The decoder accepts the documented
 27-byte range/flow message, verifies identifiers, length and checksum, and
 requires an advancing sequence and source millisecond counter. It quarantines
-the first frame and discontinuities. Duplicate/corrupt frames do not renew
-freshness. UART errors/backlogs invalidate data and are drained in bounded chunks.
+the first frame, discontinuities and the first packet after more than 60 ms
+without a checksum-valid packet. Header noise cannot refresh that timebase.
+Duplicate/corrupt frames do not renew sample freshness. Partial frames expire
+after 20 ms; accepted samples retain the first byte's host observation time.
+Expiry runs even on empty polls, so clock wrap cannot revive an old fragment.
+These are host observation ages, not synchronized physical sampling times.
+UART errors/backlogs invalidate data and are drained in bounded chunks.
 
 `flow_cm_s_at_1m` is the manufacturer's height-normalized flow field. Multiplying
 by height gives a scale estimate, **not yet a validated body/world velocity**.
@@ -174,10 +180,12 @@ torque. Each pulse requires a new arm. No command extends or switches a pulse.
 
 `d`, `!`, or any unrecognized non-newline character requests an immediate forced
 low, without a ramp. Flight-task notification interrupts its scheduled wait;
-during I2C, the request is applied after the bounded acquisition returns. Measure
-this latency. Console reception itself can be delayed by serial reporting; a
-physical power cut is the hard e-stop. Disconnecting the console cannot leave a
-motor running indefinitely: pulse, arming and output-lease timeouts still apply.
+during I2C, the request is applied when acquisition returns. Bus recovery can
+exceed the 6 ms task budget; the 30 ms output lease is the independent backstop.
+Measure both paths. The software-stop acceptance gate below is unproven, including
+under injected bus faults; a failure blocks progression to rate control. Console
+reception itself can be delayed by serial reporting; a physical power cut is the
+hard e-stop. Disconnecting the console cannot leave a motor running indefinitely: pulse, arming and output-lease timeouts still apply.
 
 The relative quaternion rotation limit is 15° from the armed pose (including
 yaw); this avoids inventing a sensor/body mounting transform. It is **not an
@@ -193,7 +201,7 @@ telemetry log with board/sensor revisions, power source and build commit.
 
 | Check | Pass criterion |
 | --- | --- |
-| Host regression | Both C tests pass under ASan/UBSan; all existing RF tests pass. |
+| Host regression | Both C tests pass under ASan/UBSan; late fragments, long reception gaps and header noise cannot renew freshness. All existing RF tests pass. |
 | Target build | Default and bench-enabled v5.5.5 images link without application warnings; inspect map for the lease ISR and force-low routine in IRAM. |
 | Power-on/reset/disarm | Every gate stays at the measured off level through boot, reset, sensor init failure and disarm. No unintended pulse on any channel. |
 | Individual channels | Each command energizes only its physical labelled motor; other three gates stay low. Record physical position and observed CW/CCW viewed from above, independently of pin labels. |

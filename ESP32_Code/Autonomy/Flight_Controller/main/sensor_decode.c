@@ -48,48 +48,62 @@ bool imu_decode(ImuSample *sample, const uint8_t data[BNO_DATA_BYTES])
     return true;
 }
 
-void flow_decode(FlowParser *parser, FlowSample *sample, uint8_t byte, uint32_t now_us)
+void flow_decode(FlowParser *parser, FlowSample *sample, const uint8_t *bytes,
+                 unsigned count, uint32_t now_us)
 {
     static const uint8_t header[MICOLINK_HEADER] = {
         MICOLINK_HEAD, MICOLINK_DEVICE, MICOLINK_SYSTEM, MICOLINK_RANGE, 0, MICOLINK_PAYLOAD
     };
-    if (parser->used < MICOLINK_HEADER && parser->used != MICOLINK_SEQUENCE && byte != header[parser->used]) {
+    if (now_us - sample->observed_us > FC_FLOW_MAX_AGE_US)
+        sample->range_valid = sample->flow_valid = false;
+    if (now_us - parser->received_us > FC_FLOW_MAX_AGE_US) parser->have_time = false;
+    if (parser->used && now_us - parser->started_us > FC_FLOW_FRAME_MAX_US) {
         parser->used = 0;
-        if (byte != MICOLINK_HEAD) return;
-    }
-    parser->bytes[parser->used++] = byte;
-    if (parser->used != MICOLINK_BYTES) return;
-    parser->used = 0;
-    uint8_t checksum = 0;
-    for (unsigned i = 0; i < MICOLINK_CHECKSUM; ++i) checksum += parser->bytes[i];
-    sample->range_valid = sample->flow_valid = false;
-    if (checksum != byte) {
+        sample->range_valid = sample->flow_valid = false;
         ++sample->rejected;
-        return;
     }
-    const uint8_t *payload = parser->bytes + MICOLINK_HEADER;
-    const uint32_t device_ms = le32(payload);
-    const uint32_t elapsed_ms = device_ms - sample->device_ms;
-    const uint8_t sequence = parser->bytes[MICOLINK_SEQUENCE];
-    const uint8_t advance = sequence - sample->sequence;
-    const bool advancing = parser->have_time && elapsed_ms > 0 && elapsed_ms <= FLOW_SOURCE_GAP_MS &&
-                           advance > 0 && advance < SEQUENCE_HALF_RANGE;
-    parser->have_time = true;
-    sample->device_ms = device_ms;
-    sample->sequence = sequence;
-    if (!advancing) {
-        ++sample->rejected;
-        return; /* Rebase on reset; require another advancing frame. */
+    for (unsigned n = 0; n < count; ++n) {
+        const uint8_t byte = bytes[n];
+        if (parser->used < MICOLINK_HEADER && parser->used != MICOLINK_SEQUENCE && byte != header[parser->used]) {
+            parser->used = 0;
+            if (byte != MICOLINK_HEAD) continue;
+        }
+        if (!parser->used) parser->started_us = now_us;
+        parser->bytes[parser->used++] = byte;
+        if (parser->used != MICOLINK_BYTES) continue;
+        parser->used = 0;
+        uint8_t checksum = 0;
+        for (unsigned i = 0; i < MICOLINK_CHECKSUM; ++i) checksum += parser->bytes[i];
+        sample->range_valid = sample->flow_valid = false;
+        if (checksum != byte) {
+            ++sample->rejected;
+            continue;
+        }
+        const uint8_t *payload = parser->bytes + MICOLINK_HEADER;
+        const uint32_t device_ms = le32(payload);
+        const uint32_t elapsed_ms = device_ms - sample->device_ms;
+        const uint8_t sequence = parser->bytes[MICOLINK_SEQUENCE];
+        const uint8_t advance = sequence - sample->sequence;
+        const bool advancing = parser->have_time && elapsed_ms > 0 && elapsed_ms <= FLOW_SOURCE_GAP_MS &&
+                               advance > 0 && advance < SEQUENCE_HALF_RANGE;
+        parser->have_time = true;
+        parser->received_us = now_us;
+        sample->device_ms = device_ms;
+        sample->sequence = sequence;
+        if (!advancing) {
+            ++sample->rejected;
+            continue; /* Rebase on reset; require another advancing frame. */
+        }
+        sample->observed_us = parser->started_us;
+        ++sample->samples;
+        sample->range_m = (float)le32(payload + RANGE_MM) * 0.001f;
+        sample->flow[0] = signed_le16(payload + FLOW_X);
+        sample->flow[1] = signed_le16(payload + FLOW_Y);
+        sample->quality = payload[FLOW_QUALITY];
+        sample->range_valid = payload[TOF_STATUS] == SENSOR_VALID &&
+            sample->range_m >= FC_RANGE_MIN_M && sample->range_m <= FC_RANGE_MAX_M;
+        sample->flow_valid = payload[FLOW_STATUS] == SENSOR_VALID && sample->quality >= FC_FLOW_MIN_QUALITY &&
+            sample->flow[0] >= -FC_FLOW_MAX_CM_S_AT_1M && sample->flow[0] <= FC_FLOW_MAX_CM_S_AT_1M &&
+            sample->flow[1] >= -FC_FLOW_MAX_CM_S_AT_1M && sample->flow[1] <= FC_FLOW_MAX_CM_S_AT_1M;
     }
-    sample->observed_us = now_us;
-    ++sample->samples;
-    sample->range_m = (float)le32(payload + RANGE_MM) * 0.001f;
-    sample->flow[0] = signed_le16(payload + FLOW_X);
-    sample->flow[1] = signed_le16(payload + FLOW_Y);
-    sample->quality = payload[FLOW_QUALITY];
-    sample->range_valid = payload[TOF_STATUS] == SENSOR_VALID &&
-        sample->range_m >= FC_RANGE_MIN_M && sample->range_m <= FC_RANGE_MAX_M;
-    sample->flow_valid = payload[FLOW_STATUS] == SENSOR_VALID && sample->quality >= FC_FLOW_MIN_QUALITY &&
-        sample->flow[0] >= -FC_FLOW_MAX_CM_S_AT_1M && sample->flow[0] <= FC_FLOW_MAX_CM_S_AT_1M &&
-        sample->flow[1] >= -FC_FLOW_MAX_CM_S_AT_1M && sample->flow[1] <= FC_FLOW_MAX_CM_S_AT_1M;
 }

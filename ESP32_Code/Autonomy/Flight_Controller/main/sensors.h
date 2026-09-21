@@ -28,12 +28,15 @@ typedef struct {
 } Sensors;
 
 typedef struct {
+    uint32_t started_us, received_us;
     uint8_t bytes[MICOLINK_BYTES], used;
     bool have_time;
 } FlowParser;
 
 bool imu_decode(ImuSample *sample, const uint8_t data[BNO_DATA_BYTES]);
 bool imu_status_valid(const uint8_t status[BNO_STATUS_BYTES]);
-void flow_decode(FlowParser *parser, FlowSample *sample, uint8_t byte, uint32_t now_us);
+/* Call every poll, including empty reads, to latch expiry across clock wrap. */
+void flow_decode(FlowParser *parser, FlowSample *sample, const uint8_t *bytes,
+                 unsigned count, uint32_t now_us);
 int sensors_init(Sensors *samples);
 void sensors_poll(Sensors *samples, uint32_t now_us);

@@ -1,6 +1,9 @@
 # ESP32-S3 flight bench verification
 
-Software validation on 2026-09-20, starting from `87ecdad` on `main`.
+Initial software validation on 2026-09-20 started from `87ecdad` on `main`.
+The 2026-09-21 continuation audit started from `b67e768`; the measurements below
+now describe the audited implementation. The user confirmed no hardware tests
+had run and requested completion of this software audit only.
 No board, sensors, motor drivers or motors were connected. This is the first
 sensor/motor bring-up stage; it cannot stabilize or fly an aircraft. Default
 builds cannot arm. The [operator guide](../../ESP32_Code/Autonomy/Flight_Controller/README.md)
@@ -36,8 +39,33 @@ unmeasured. The future estimator contract is documented, without unused VIO or
 controller code. Mixer, PID, frame-transform and position-control implementation
 and their tests are gated after the physical bring-up results.
 
-The two existing-file changes (CI and the ESP32 README) were shown as a diff
-before applying them. All implementation and test files are new.
+The initial implementation added the flight source/test files and changed CI
+and the ESP32 README. The continuation modifies only existing flight files, their
+tests, CI and this validation record.
+
+## Continuation findings
+
+Recovered the earlier repository-wide inspection and rechecked the current file
+inventory, architecture/hardware notes, flight sources/tests, CI and git history.
+The file tree and module ownership remain unchanged. Diffs were shown before
+modifying existing files. No mixer, PID or flight stage was added.
+
+A reproducer against `b67e768` accepted a 459 ms old partial Micolink frame and
+stamped it as fresh. A complete frame after a 500 ms reception gap also bypassed
+source-clock requalification. The corrected decoder now:
+
+- expires fragments after two polling periods (20 ms);
+- timestamps accepted data at the first observed byte;
+- expires the source-clock baseline after 60 ms without a checksum-valid packet;
+- checks expiry on empty polls, latching invalidity across host-clock wrap.
+
+Frame-start and checksum-valid reception timestamps must remain separate: using
+one timestamp failed a regression where repeated bad headers kept the old source
+baseline alive. The final tests cover all 26 split positions at the deadline and
+one microsecond beyond it, empty polls, long gaps, header noise and wrap/recovery.
+The parser receives one bounded UART batch per poll instead of one call per byte;
+its additional age checks consequently run once per poll. No cycle-time benefit
+is claimed without target measurements.
 
 ## Primary sources and implementation history
 
@@ -55,7 +83,12 @@ FreeRTOS and watchdog contracts were checked in official documentation and
 `mcpwm_generator_set_force_level()` is not covered by the MCPWM control-IRAM
 option; the small linker fragment explicitly places that motor-off dependency
 in instruction RAM. Synchronous I2C allocates during initialization, not per poll.
-Timeout recovery still needs measurement; a timeout argument is not a WCET proof.
+The continuation traced the S3's bus-clear path to a separate **50 ms** timeout in
+[`s_i2c_master_clear_bus`](https://github.com/espressif/esp-idf/blob/b774170ff46c393eeb5e495ea37936038d3f4f4f/components/esp_driver_i2c/i2c_master.c#L52).
+Thus the configured 2 ms transaction timeout does not bound total call duration.
+The 6 ms execution/software-stop gates remain unproven under bus faults; the
+30 ms output lease must be scope-tested independently. Missing either gate blocks
+rate-control progression. No deterministic WCET claim follows from this build.
 
 Mico's [MTF-02/02P manual](https://micoair.cn/zh/docs/sensors/sensors/mtf-02-02p-sensors)
 and [Micolink definition](https://micoair.cn/zh/docs/sensors/micolink) supply the
@@ -88,7 +121,7 @@ from the controller. An additional safety commit on an experimental branch was
 not treated as default-branch behavior. No upstream source code was copied.
 
 Compared current PX4 at
-[`2fc441493eb887199c279e2eff990f3f4cd0deef`](https://github.com/PX4/PX4-Autopilot/tree/2fc441493eb887199c279e2eff990f3f4cd0deef)
+[`1459066534561cb3b8863430e3da25667c80a48e`](https://github.com/PX4/PX4-Autopilot/tree/1459066534561cb3b8863430e3da25667c80a48e)
 with its [multicopter controller documentation](https://docs.px4.io/main/en/flight_stack/controller_diagrams).
 Reviewed position/velocity control, quaternion attitude, rate control and sequential
 desaturation. The useful design is bounded position P → velocity PID →
@@ -141,23 +174,27 @@ reports directory; no new generic infrastructure or dependency was introduced.
 
 1. **Correctness:** checked byte order, signed decoding, units, quaternion norm/sign,
    source-clock/sequence rollover, IMU revision/status and pulse/arm transitions.
+   Reproduced stale-frame acceptance and added explicit assembly/reception expiry.
    No unverified sensor/body transform or motor rotation was invented. Post-read
    DRDY acknowledgement conservatively avoids counting an intervening flag twice.
 2. **Safety:** traced every init failure, disarm, invalid/stale command/sensor,
-   repeated pulse, deadline and timer expiry to forced-low output. Added latched
-   age invalidation against long-running clock wrap. NaN/Inf, bad norms and
-   excessive motion cannot arm. Driver polarity and physical shutdown remain gates.
+   repeated pulse, deadline and timer expiry to forced-low output. Checked latched
+   measurement and fragment expiry against long-running clock wrap. NaN/Inf, bad
+   norms and excessive motion cannot arm. Driver polarity and physical shutdown remain gates.
 3. **Real time:** one statically allocated pinned task; no loop allocation/logging,
    filesystem or network calls. Checked IDF call paths, bounded UART/event reads,
-   I2C timeouts/recovery, stop wakeup, ISR race exclusion and IRAM placement.
+   I2C timeouts/recovery (including the 50 ms path), stop wakeup, ISR race
+   exclusion and IRAM placement.
    Scheduling skips late catch-up iterations. Actual timing remains unmeasured.
 4. **Computation:** retained one quaternion normalization per accepted read and
    squared norm/dot guards, with no Euler/trigonometric control math. Reused sensor
-   records and one elapsed-time sample at each decision boundary. Minimal IDF
-   component selection removed unrelated build dependencies.
+   records and one elapsed-time sample at each decision boundary. The decoder
+   now processes a bounded batch, removing up to 26 cross-module calls per frame. Minimal IDF component selection avoids unrelated
+   build dependencies. Timing improvements are unmeasured.
 5. **Memory:** replaced two one-entry static queues with fixed mailbox records,
    saving 160 application static bytes. Core-0 local stack frame fell 320→240 bytes.
-   Parser storage is 29 bytes; no duplicate raw sensor history or unused estimates.
+   Parser storage is now 40 bytes (29 previously): two distinct timestamps cost
+   11 bytes including alignment. No duplicate sensor history or unused estimates.
 6. **Structure:** five cohesive C modules, each below 200 physical lines. Portable
    decoding and safety are separate only because they have independent host tests.
    Kept initialization error checks local instead of creating a utility framework.
@@ -166,14 +203,16 @@ reports directory; no new generic infrastructure or dependency was introduced.
    serves acquisition, safety or requested instrumentation. No TODO control stubs,
    speculative interfaces, unused controller gains or debug logging remain.
 8. **Regression:** rebuilt both target variants after the final sensor fixes,
-   reran sanitizer tests and the existing RF suite, and checked compiler analysis,
+   reran sanitizer tests and both RF test runners, and checked compiler analysis,
    map/stack artifacts and whitespace. The final pre-commit audit found no further
    material simplification within this stage that preserved its safety evidence.
 
 Rejected optimizations: fast-math/approximate inverse square root would weaken
 finite/norm checks without measured benefit; fixed point adds conversion/range
 burden; unlocked snapshots/seqlock retries complicate correctness and timing;
-asynchronous I2C adds state/error handling before a measured need. Shrinking the
+asynchronous I2C adds state/error handling; reconsider it if the physical
+I2C-fault tests fail the timing gate. Sharing the two parser timestamps saved
+four bytes but failed the header-noise regression, so it was rejected. Shrinking the
 4 KiB stack or placing the entire loop in IRAM needs hardware evidence. Removing
 defensive validity checks or caching duplicate motor-output state was not justified.
 No timing improvement is inferred from source size or successful compilation.
@@ -182,20 +221,20 @@ No timing improvement is inferred from source size or successful compilation.
 
 Installed official IDF/tools outside the repository and built with ESP-IDF v5.5.5,
 Xtensa GCC 14.2.0 and Ninja. Host tests used GCC 13.3, C11, optimization, strict
-warnings, assertions, ASan and UBSan. RF tests used an isolated Python 3.12
-environment; unrelated globally installed ROS pytest plugins were excluded.
+warnings, assertions, ASan and UBSan. Continuation RF tests used an isolated
+Python 3.14.6 environment; IDF used Python 3.12.3. Unrelated ROS Python paths and pytest plugins were excluded.
 
 | Check | Result |
 | --- | --- |
 | Default ESP32-S3 image | Passed; `FC_BENCH_ENABLE=0`. |
 | Motor-test image | Passed; compiler response file verified `-DFC_BENCH_ENABLE=1`. |
 | CTest | 2/2 executables passed under ASan/UBSan. |
-| Sensor coverage | Quaternion/scaling/status, source reset/duplicate/wrap, packet corruption at every byte, truncation recovery, 200,000 deterministic noise bytes. |
+| Sensor coverage | Quaternion/scaling/status, source reset/duplicate/wrap, packet corruption at every byte, timed fragmentation at every split, reception-gap/noise recovery, empty-poll expiry, 200,000 deterministic noise bytes. |
 | Bench coverage | All four logical channels, default lockout, arm/pulse expiry, repeated command rejection, explicit stop, motion, invalid/stale inputs, command age and time rollover. |
 | GCC static analyzer | Portable decoder and bench state code passed `-fanalyzer`. |
 | Existing RF pytest | 72 passed; two existing metadata-unavailable warnings. |
 | Existing RF unittest / wheel / compileall | 72 passed / wheel built / passed. |
-| GitHub Actions | Added host and IDF-container jobs; local equivalents passed. Remote CI has not been run. |
+| GitHub Actions | Host tests and both default/motor-test IDF builds are configured; local equivalents passed. Remote CI has not been run. |
 
 No motor-driver or I2C/UART hardware test is implied by portable unit tests.
 Mixer-sign/desaturation, PID anti-windup and body/local-frame tests do not yet
@@ -206,29 +245,29 @@ exist because their corresponding control stages have not been implemented.
 | `main/bench.c` | 72 | 69 |
 | `main/main.c` | 181 | 174 |
 | `main/motors.c` | 107 | 102 |
-| `main/sensor_decode.c` | 95 | 89 |
-| `main/sensors.c` | 127 | 116 |
-| Firmware C total | **582** | **550** |
+| `main/sensor_decode.c` | 109 | 103 |
+| `main/sensors.c` | 125 | 114 |
+| Firmware C total | **594** | **562** |
 | `main/bench.h` | 19 | 16 |
-| `main/config.h` | 48 | 43 |
+| `main/config.h` | 49 | 44 |
 | `main/motors.h` | 6 | 4 |
-| `main/sensors.h` | 39 | 32 |
+| `main/sensors.h` | 42 | 34 |
 | `test_bench.c` | 128 | 122 |
-| `test_sensors.c` | 131 | 123 |
+| `test_sensors.c` | 185 | 174 |
 
 | Metric | Evidence/result |
 | --- | --- |
-| Application binary | 191,600 bytes, both variants; 1 MiB application slot. |
-| Application-attributed static data | 4,650 bytes (`libmain.a`: BSS 4,634 + data 16), including the 4,096-byte flight stack. |
-| Whole-image static data | 17,352 bytes (BSS 6,600 + data 10,752); excludes RAM-resident code and driver/runtime heap. |
+| Application binary | 191,680 bytes, both variants (80 bytes above `b67e768`); 1 MiB application slot. |
+| Application-attributed static data | 4,661 bytes (`libmain.a`: BSS 4,645 + data 16), including the 4,096-byte flight stack. |
+| Whole-image static data | 17,360 bytes (BSS 6,608 + data 10,752); excludes RAM-resident code and driver/runtime heap. |
 | Mailbox | 136 bytes plus an 8-byte spinlock; bounded copies, no queue allocation. |
-| Compiler local stack frames | Flight task 224, console 240, sensor poll 160, motor write 80, lease callback 32 bytes. These exclude callees/interrupts and are not runtime high-water measurements. |
+| Compiler local stack frames | Flight task 224, console 240, sensor poll 176, decoder 48, motor write 80, lease callback 32 bytes. These exclude callees/interrupts and are not runtime high-water measurements. |
 | Motor-off code placement | ELF symbols: lease callback `0x40376874`, GPTimer ISR `0x40377990`, MCPWM force-level `0x40377f9c`, in instruction RAM. |
 | Flight execution mean/worst, jitter, missed deadlines | Not measurable without hardware; firmware reports them. |
 | Runtime stack high-water / initialization heap | Not measured; stack high-water reporting is implemented. |
 | Sensor age/rate/latency and physical motor order/polarity | Not measured; must pass the operator guide's bench gates. |
 
-The software stage is ready for props-off bench validation. Passing builds/tests
-does not validate electrical behavior, watchdog shutdown latency, stable flight
+The stage-1 software audit is complete; physical bench acceptance is pending.
+Passing builds/tests does not validate electrical behavior, watchdog shutdown latency, stable flight
 or position hold. Progress to the mixer and innermost controller only after the
 recorded physical gates pass.

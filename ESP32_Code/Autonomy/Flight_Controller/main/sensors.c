@@ -82,8 +82,6 @@ void sensors_poll(Sensors *samples, uint32_t now_us)
     ImuSample *s = &samples->imu;
     /* Latch expiry so a later 32-bit clock wrap cannot revive old data. */
     if (now_us - s->observed_us > FC_IMU_MAX_AGE_US) s->valid = false;
-    if (now_us - samples->flow.observed_us > FC_FLOW_MAX_AGE_US)
-        samples->flow.range_valid = samples->flow.flow_valid = false;
     if (read_imu(BNO_STATUS, status, sizeof(status)) != ESP_OK) {
         s->valid = false;
     } else {
@@ -122,6 +120,6 @@ void sensors_poll(Sensors *samples, uint32_t now_us)
         ++samples->flow.rejected;
         parser = (FlowParser){0};
     } else {
-        for (int i = 0; i < count; ++i) flow_decode(&parser, &samples->flow, bytes[i], now_us);
+        flow_decode(&parser, &samples->flow, bytes, (unsigned)count, now_us);
     }
 }
