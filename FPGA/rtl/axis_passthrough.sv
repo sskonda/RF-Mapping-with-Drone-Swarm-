@@ -1,3 +1,10 @@
+/*
+Author: Sanat Konda
+Date: Sept 21, 2026
+
+Purpose: Register AXI stream data, adding one to each word.
+*/
+
 module axis_passthrough #(
     parameter int DATA_WIDTH = 32
 ) (

@@ -1,4 +1,11 @@
 /*
+Author: Sanat Konda
+Date: Sept 21, 2026
+
+Purpose: Extract x/y/z/RSSI observations while forwarding the AXI stream.
+*/
+
+/*
 AXI word 0 → x
 AXI word 1 → y
 AXI word 2 → z

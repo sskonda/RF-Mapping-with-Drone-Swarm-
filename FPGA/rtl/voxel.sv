@@ -1,3 +1,10 @@
+/*
+Author: Sanat Konda
+Date: Sept 21, 2026
+
+Purpose: Map positions to voxel addresses, pass RSSI, and flag out-of-bounds observations.
+*/
+
 module voxel #(
     parameter int X_MIN_MM = 0,
     parameter int Y_MIN_MM = 0,
