@@ -1,77 +1,95 @@
 /*
 Author: Sanat Konda
-Date: Sept 21, 2026
+Updated: Sept 22, 2026
 
-Purpose: Map positions to voxel addresses, pass RSSI, and flag out-of-bounds observations.
+Purpose: Convert positions into signed voxel coordinates for a sparse map.
 */
 
 module voxel #(
-    parameter int X_MIN_MM = 0,
-    parameter int Y_MIN_MM = 0,
-    parameter int Z_MIN_MM = 0,
-    parameter int VOXEL_SIZE_MM = 500,
-    parameter int NX = 8,
-    parameter int NY = 8,
-    parameter int NZ = 4,
-    parameter int ADDR_WIDTH = (NX*NY*NZ > 1) ? $clog2(NX*NY*NZ) : 1
+    parameter int X_ORIGIN_MM = 0,
+    parameter int Y_ORIGIN_MM = 0,
+    parameter int Z_ORIGIN_MM = 0,
+    parameter int VOXEL_SIZE_MM = 500
 ) (
-    input  logic                         aclk,
-    input  logic                         aresetn,
-    input  logic signed [31:0]           x_mm,
-    input  logic signed [31:0]           y_mm,
-    input  logic signed [31:0]           z_mm,
-    input  logic signed [31:0]           rssi_dbm,
-    input  logic                         observation_valid,
-    output logic [ADDR_WIDTH-1:0]        voxel_address,
-    output logic signed [31:0]           voxel_rssi_dbm,
-    output logic                         voxel_valid,
-    output logic                         out_of_bounds
+    input  logic               aclk,
+    input  logic               aresetn,
+    input  logic signed [31:0] x_mm,
+    input  logic signed [31:0] y_mm,
+    input  logic signed [31:0] z_mm,
+    input  logic signed [31:0] rssi_dbm,
+    input  logic               observation_valid,
+    output logic               observation_ready,
+
+    output logic signed [32:0] voxel_x,
+    output logic signed [32:0] voxel_y,
+    output logic signed [32:0] voxel_z,
+    output logic signed [31:0] voxel_rssi_dbm,
+    output logic               voxel_valid,
+    input  logic               voxel_ready
 );
 
-    localparam longint X_MAX_MM = longint'(X_MIN_MM) + longint'(NX)*VOXEL_SIZE_MM;
-    localparam longint Y_MAX_MM = longint'(Y_MIN_MM) + longint'(NY)*VOXEL_SIZE_MM;
-    localparam longint Z_MAX_MM = longint'(Z_MIN_MM) + longint'(NZ)*VOXEL_SIZE_MM;
+    // This division is evaluated at elaboration, not by runtime hardware.
+    localparam int SCALE_SHIFT = 32 + $clog2(VOXEL_SIZE_MM);
+    localparam logic [32:0] RECIPROCAL = 33'(
+        ((64'd1 << SCALE_SHIFT) + 64'(VOXEL_SIZE_MM) - 1) /
+        64'(VOXEL_SIZE_MM)
+    );
 
-    int unsigned vx, vy, vz;
-    logic in_bounds;
+    logic signed [32:0] x_offset, y_offset, z_offset;
+    logic signed [31:0] rssi_r;
+    logic offset_valid;
+    logic output_ready;
 
-    always_comb begin
-        vx = 0;
-        vy = 0;
-        vz = 0;
+    function automatic logic signed [32:0] voxel_index(
+        input logic signed [32:0] offset
+    );
+        logic [31:0] magnitude;
+        logic [64:0] product;
+        logic [32:0] quotient;
 
-        for (int i = 1; i < NX; i++)
-            if (longint'(x_mm) >= longint'(X_MIN_MM) + longint'(i)*VOXEL_SIZE_MM)
-                vx = i;
+        // For negative offsets, use -offset-1, then -quotient-1: floor division.
+        magnitude = offset[32] ? ~offset[31:0] : offset[31:0];
+        product = magnitude * RECIPROCAL;
+        quotient = 33'(product >> SCALE_SHIFT);
+        return offset[32] ? $signed(~quotient) : $signed(quotient);
+    endfunction
 
-        for (int i = 1; i < NY; i++)
-            if (longint'(y_mm) >= longint'(Y_MIN_MM) + longint'(i)*VOXEL_SIZE_MM)
-                vy = i;
-
-        for (int i = 1; i < NZ; i++)
-            if (longint'(z_mm) >= longint'(Z_MIN_MM) + longint'(i)*VOXEL_SIZE_MM)
-                vz = i;
-
-        in_bounds = x_mm >= X_MIN_MM && longint'(x_mm) < X_MAX_MM &&
-                    y_mm >= Y_MIN_MM && longint'(y_mm) < Y_MAX_MM &&
-                    z_mm >= Z_MIN_MM && longint'(z_mm) < Z_MAX_MM;
-    end
+    assign output_ready = !voxel_valid || voxel_ready;
+    assign observation_ready = aresetn && (!offset_valid || output_ready);
 
     always_ff @(posedge aclk) begin
         if (!aresetn) begin
-            voxel_address  <= '0;
-            voxel_rssi_dbm <= '0;
-            voxel_valid    <= 1'b0;
-            out_of_bounds  <= 1'b0;
+            offset_valid <= 1'b0;
+            voxel_valid  <= 1'b0;
         end else begin
-            voxel_valid   <= observation_valid && in_bounds;
-            out_of_bounds <= observation_valid && !in_bounds;
+            if (observation_ready)
+                offset_valid <= observation_valid;
 
-            if (observation_valid && in_bounds) begin
-                voxel_address  <= ADDR_WIDTH'(vx + NX*vy + NX*NY*vz);
-                voxel_rssi_dbm <= rssi_dbm;
-            end
+            if (output_ready)
+                voxel_valid <= offset_valid;
+        end
+
+        // Data registers need no reset; their valid bits determine usability.
+        if (observation_valid && observation_ready) begin
+            x_offset <= 33'(x_mm) - 33'(X_ORIGIN_MM);
+            y_offset <= 33'(y_mm) - 33'(Y_ORIGIN_MM);
+            z_offset <= 33'(z_mm) - 33'(Z_ORIGIN_MM);
+            rssi_r   <= rssi_dbm;
+        end
+
+        if (offset_valid && output_ready) begin
+            voxel_x        <= voxel_index(x_offset);
+            voxel_y        <= voxel_index(y_offset);
+            voxel_z        <= voxel_index(z_offset);
+            voxel_rssi_dbm <= rssi_r;
         end
     end
+
+    // synthesis translate_off
+    initial begin
+        if (VOXEL_SIZE_MM <= 0)
+            $fatal(1, "VOXEL_SIZE_MM must be positive");
+    end
+    // synthesis translate_on
 
 endmodule
