@@ -1,8 +1,9 @@
 /*
 Author: Sanat Konda
-Updated: Sept 22, 2026
+Updated: Sept 23, 2026
 
 Purpose: Convert positions into signed voxel coordinates for a sparse map.
+Four elastic stages: normalize, partial products, partial sums, output.
 */
 
 module voxel #(
@@ -35,53 +36,87 @@ module voxel #(
         64'(VOXEL_SIZE_MM)
     );
 
-    logic signed [32:0] x_offset, y_offset, z_offset;
-    logic signed [31:0] rssi_r;
-    logic offset_valid;
-    logic output_ready;
+    localparam int ORIGIN_MM [3] = '{X_ORIGIN_MM, Y_ORIGIN_MM, Z_ORIGIN_MM};
+    logic signed [31:0] position [3];
+    logic signed [32:0] coordinate [3];
+    logic signed [31:0] rssi_pipe [4];
+    logic [3:0] stage_valid, stage_ready;
 
-    function automatic logic signed [32:0] voxel_index(
-        input logic signed [32:0] offset
-    );
-        logic [31:0] magnitude;
-        logic [64:0] product;
-        logic [32:0] quotient;
+    assign position[0] = x_mm;
+    assign position[1] = y_mm;
+    assign position[2] = z_mm;
+    assign voxel_x = coordinate[0];
+    assign voxel_y = coordinate[1];
+    assign voxel_z = coordinate[2];
+    assign voxel_rssi_dbm = rssi_pipe[3];
+    assign voxel_valid = stage_valid[3];
+    assign observation_ready = aresetn && stage_ready[0];
 
-        // For negative offsets, use -offset-1, then -quotient-1: floor division.
-        magnitude = offset[32] ? ~offset[31:0] : offset[31:0];
-        product = magnitude * RECIPROCAL;
-        quotient = 33'(product >> SCALE_SHIFT);
-        return offset[32] ? $signed(~quotient) : $signed(quotient);
-    endfunction
-
-    assign output_ready = !voxel_valid || voxel_ready;
-    assign observation_ready = aresetn && (!offset_valid || output_ready);
+    assign stage_ready[3] = !stage_valid[3] || voxel_ready;
+    for (genvar stage = 0; stage < 3; stage++) begin : g_ready
+        assign stage_ready[stage] = !stage_valid[stage] || stage_ready[stage+1];
+    end
 
     always_ff @(posedge aclk) begin
         if (!aresetn) begin
-            offset_valid <= 1'b0;
-            voxel_valid  <= 1'b0;
+            stage_valid <= '0;
         end else begin
-            if (observation_ready)
-                offset_valid <= observation_valid;
-
-            if (output_ready)
-                voxel_valid <= offset_valid;
+            if (stage_ready[0])
+                stage_valid[0] <= observation_valid;
+            for (int stage = 1; stage < 4; stage++)
+                if (stage_ready[stage])
+                    stage_valid[stage] <= stage_valid[stage-1];
         end
 
-        // Data registers need no reset; their valid bits determine usability.
-        if (observation_valid && observation_ready) begin
-            x_offset <= 33'(x_mm) - 33'(X_ORIGIN_MM);
-            y_offset <= 33'(y_mm) - 33'(Y_ORIGIN_MM);
-            z_offset <= 33'(z_mm) - 33'(Z_ORIGIN_MM);
-            rssi_r   <= rssi_dbm;
-        end
+        // Payload registers need no reset; valid bits determine usability.
+        if (observation_valid && observation_ready)
+            rssi_pipe[0] <= rssi_dbm;
+        for (int stage = 1; stage < 4; stage++)
+            if (stage_valid[stage-1] && stage_ready[stage])
+                rssi_pipe[stage] <= rssi_pipe[stage-1];
+    end
 
-        if (offset_valid && output_ready) begin
-            voxel_x        <= voxel_index(x_offset);
-            voxel_y        <= voxel_index(y_offset);
-            voxel_z        <= voxel_index(z_offset);
-            voxel_rssi_dbm <= rssi_r;
+    for (genvar axis = 0; axis < 3; axis++) begin : g_axis
+        logic signed [32:0] offset;
+        logic [31:0] magnitude;
+        logic [2:0] negative;
+        (* use_dsp = "yes" *) logic [31:0] product_ll, product_hl;
+        (* use_dsp = "yes" *) logic [32:0] product_lh, product_hh;
+        logic [48:0] sum_lo, sum_hi;
+        logic [64:0] product;
+        logic [32:0] quotient;
+
+        assign offset = 33'(position[axis]) - 33'(ORIGIN_MM[axis]);
+        assign product = {16'b0, sum_lo} + {sum_hi, 16'b0};
+        assign quotient = 33'(product >> SCALE_SHIFT);
+
+        always_ff @(posedge aclk) begin
+            // Stage 0: negative offsets use -offset-1 for floor division.
+            if (observation_valid && observation_ready) begin
+                magnitude <= offset[32] ? ~offset[31:0] : offset[31:0];
+                negative[0] <= offset[32];
+            end
+
+            // Stage 1: each 16x16 or 16x17 product fits one DSP48E1.
+            if (stage_valid[0] && stage_ready[1]) begin
+                product_ll <= magnitude[15:0]  * RECIPROCAL[15:0];
+                product_lh <= magnitude[15:0]  * RECIPROCAL[32:16];
+                product_hl <= magnitude[31:16] * RECIPROCAL[15:0];
+                product_hh <= magnitude[31:16] * RECIPROCAL[32:16];
+                negative[1] <= negative[0];
+            end
+
+            // Stage 2: reconstruct each 16x33 half-product independently.
+            if (stage_valid[1] && stage_ready[2]) begin
+                sum_lo <= {17'b0, product_ll} + {product_lh, 16'b0};
+                sum_hi <= {17'b0, product_hl} + {product_hh, 16'b0};
+                negative[2] <= negative[1];
+            end
+
+            // Stage 3: combine halves, scale, and restore the signed floor.
+            if (stage_valid[2] && stage_ready[3])
+                coordinate[axis] <= negative[2] ? $signed(~quotient) :
+                                                 $signed(quotient);
         end
     end
 
