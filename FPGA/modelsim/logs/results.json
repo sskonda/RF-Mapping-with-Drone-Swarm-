@@ -1,0 +1,104 @@
+{
+  "started_utc": "2026-09-30T00:05:46.133989+00:00",
+  "seed": 20260929,
+  "status": "PASS",
+  "tests": [
+    {
+      "top": "axis_passthrough_tb",
+      "status": "PASS",
+      "details": [
+        "PASS axis width 64: in=82 out=81 aborted=1 stalls=36 overlap=37",
+        "PASS axis width 32: in=82 out=81 aborted=1 stalls=36 overlap=37",
+        "PASS axis width 8: in=82 out=81 aborted=1 stalls=36 overlap=37",
+        "PASS: all axis passthrough configurations"
+      ],
+      "log": "logs/axis_passthrough_tb.log",
+      "waveform": "waves/axis_passthrough_tb.wlf"
+    },
+    {
+      "top": "rf_packet_unpacker_tb",
+      "status": "PASS",
+      "details": [
+        "PASS: 11 observations accepted, 56 AXI words forwarded; reset drops pending data"
+      ],
+      "log": "logs/rf_packet_unpacker_tb.log",
+      "waveform": "waves/rf_packet_unpacker_tb.wlf"
+    },
+    {
+      "top": "voxel_tb",
+      "status": "PASS",
+      "details": [
+        "PASS voxel case 2: 35 accepted outputs; signed coordinates, stalls, reset",
+        "PASS voxel case 1: 37 accepted outputs; signed coordinates, stalls, reset",
+        "PASS voxel case 0: 37 accepted outputs; signed coordinates, stalls, reset",
+        "PASS: all voxel cases completed"
+      ],
+      "log": "logs/voxel_tb.log",
+      "waveform": "waves/voxel_tb.wlf"
+    },
+    {
+      "top": "rf_voxel_pipeline_tb",
+      "status": "PASS",
+      "details": [
+        "PASS: unpacker -> voxel: 8 observations, 32 AXI words; both sinks stalled"
+      ],
+      "log": "logs/rf_voxel_pipeline_tb.log",
+      "waveform": "waves/rf_voxel_pipeline_tb.wlf"
+    },
+    {
+      "top": "tb_voxel_lookup",
+      "status": "PASS",
+      "details": [
+        "PASS MAX=1 TABLE=2 accepted=1016 received=1015 aborted=1 stalls=383 max_latency=27",
+        "PASS MAX=5 TABLE=8 accepted=1038 received=1036 aborted=2 stalls=375 max_latency=27",
+        "PASS MAX=8 TABLE=8 accepted=1053 received=1051 aborted=2 stalls=353 max_latency=27",
+        "PASS MAX=1024 TABLE=2048 accepted=3109 received=3107 aborted=2 stalls=1070 max_latency=27",
+        "PASS: all voxel lookup configurations"
+      ],
+      "log": "logs/tb_voxel_lookup.log",
+      "waveform": "waves/tb_voxel_lookup.wlf"
+    },
+    {
+      "top": "tb_voxel_accumulator",
+      "status": "PASS",
+      "details": [
+        "PASS MAX=1 COUNT=3: received=1543 aborted=2 rejected=1512 overflow=1421 stalled=525",
+        "PASS MAX=5 COUNT=3: received=1547 aborted=2 rejected=1488 overflow=1397 stalled=525",
+        "PASS MAX=1024 COUNT=32: received=2552 aborted=2 rejected=90 overflow=0 stalled=525",
+        "PASS: all accumulator configurations"
+      ],
+      "log": "logs/tb_voxel_accumulator.log",
+      "waveform": "waves/tb_voxel_accumulator.wlf"
+    },
+    {
+      "top": "tb_voxel_accumulator_pipeline",
+      "status": "PASS",
+      "details": [
+        "PASS pipeline: 2008 observations/results, 396 rejected, 2907 upstream stall cycles"
+      ],
+      "log": "logs/tb_voxel_accumulator_pipeline.log",
+      "waveform": "waves/tb_voxel_accumulator_pipeline.wlf"
+    }
+  ],
+  "simulator": "Model Technology ModelSim - INTEL FPGA STARTER EDITION vsim 2020.1 Simulator 2020.02 Feb 28 2020",
+  "sources": [
+    "../rtl/axis_passthrough.sv",
+    "../rtl/rf_packet_unpacker.sv",
+    "../rtl/voxel.sv",
+    "../rtl/voxel_accumulator.sv",
+    "../rtl/voxel_lookup.sv",
+    "../rtl/axis_passthrough_wrapper.v",
+    "../rtl/rf_packet_unpacker_wrapper.v",
+    "../rtl/voxel_accumulator_wrapper.v",
+    "../rtl/voxel_lookup_wrapper.v",
+    "../rtl/voxel_wrapper.v",
+    "../tb/axis_passthrough_tb.sv",
+    "../tb/rf_packet_unpacker_tb.sv",
+    "../tb/rf_voxel_pipeline_tb.sv",
+    "../tb/tb_voxel_accumulator.sv",
+    "../tb/tb_voxel_accumulator_pipeline.sv",
+    "../tb/tb_voxel_lookup.sv",
+    "../tb/voxel_tb.sv"
+  ],
+  "finished_utc": "2026-09-30T00:05:56.871687+00:00"
+}

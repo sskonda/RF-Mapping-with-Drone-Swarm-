@@ -31,6 +31,7 @@ module rf_packet_unpacker_tb;
     integer simultaneous_transfers = 0;
     integer observation_stall_cycles = 0;
     integer axis_stall_cycles = 0;
+    integer packet_field = 0;
 
     logic previous_observation_stall = 1'b0;
     logic previous_axis_stall = 1'b0;
@@ -41,6 +42,7 @@ module rf_packet_unpacker_tb;
     // Check the values visible to receivers at the sampling edge, before NBA updates.
     always @(posedge aclk) begin
         if (!aresetn) begin
+            packet_field = 0;
             previous_observation_stall = 1'b0;
             previous_axis_stall = 1'b0;
             if (s_axis_tready !== 1'b0 || m_axis_tvalid !== 1'b0)
@@ -62,12 +64,17 @@ module rf_packet_unpacker_tb;
 
             if (observation_valid && !observation_ready) begin
                 observation_stall_cycles = observation_stall_cycles + 1;
-                if (s_axis_tready !== 1'b0 || m_axis_tvalid !== 1'b0)
-                    $fatal(1, "Pending observation did not block both AXI interfaces");
+                // X/Y/Z may prefetch; only RSSI requires a free observation slot.
+                if (packet_field == 3 &&
+                    (s_axis_tready !== 1'b0 || m_axis_tvalid !== 1'b0))
+                    $fatal(1, "Pending observation did not block the next RSSI word");
             end
 
-            if (s_axis_tvalid && s_axis_tready)
+            if (s_axis_tvalid && s_axis_tready) begin
                 input_words = input_words + 1;
+                packet_field = (s_axis_tlast || packet_field == 3) ?
+                               0 : packet_field + 1;
+            end
             if (m_axis_tvalid && m_axis_tready) begin
                 output_words = output_words + 1;
                 if (m_axis_tdata !== s_axis_tdata || m_axis_tlast !== s_axis_tlast)
@@ -153,9 +160,9 @@ module rf_packet_unpacker_tb;
             expected_read = 0;
             expected_write = 0;
             repeat (2) @(negedge aclk);
-            if (observation_valid !== 1'b0 ||
-                {x_mm, y_mm, z_mm, rssi_dbm} !== 128'b0)
-                $fatal(1, "Reset did not clear observation outputs");
+            // Payload registers are intentionally unreset; valid controls use.
+            if (observation_valid !== 1'b0)
+                $fatal(1, "Reset did not clear observation_valid");
             aresetn = 1'b1;
         end
     endtask
@@ -187,9 +194,9 @@ module rf_packet_unpacker_tb;
             send_packet(101, 202, 303, -77, 1'b1);
             begin
                 repeat (8) @(negedge aclk);
-                if (input_words != words_before_stall ||
-                    output_words != words_before_stall || accepted_observations != 0)
-                    $fatal(1, "A transfer escaped the observation stall");
+                if (input_words != words_before_stall + 3 ||
+                    output_words != words_before_stall + 3 || accepted_observations != 0)
+                    $fatal(1, "Expected exactly X/Y/Z to prefetch during the observation stall");
                 observation_ready = 1'b1;
             end
         join

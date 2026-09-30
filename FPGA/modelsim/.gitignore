@@ -1,0 +1,11 @@
+/work/
+/transcript
+/vsim.wlf
+/*stacktrace.vstf
+/*.cr.mti
+/modelsim.ini
+/*.bak
+/logs/*_baseline.log
+/logs/compile_probe.log
+/logs/gui*
+/logs/*.do

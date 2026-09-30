@@ -1,0 +1,22 @@
+Reading pref.tcl
+
+# 2020.1
+
+# vsim -c -onfinish stop -t 1ps -sv_seed 20260929 -voptargs="+acc" -wlf waves/voxel_tb.wlf work.voxel_tb -do "simulate.do" 
+# Start time: 20:05:50 on Sep 29,2026
+# Loading sv_std.std
+# Loading work.voxel_tb
+# Loading work.voxel_test_case
+# Loading work.voxel_wrapper
+# Loading work.voxel
+# do simulate.do
+# PASS voxel case 2: 35 accepted outputs; signed coordinates, stalls, reset
+# PASS voxel case 1: 37 accepted outputs; signed coordinates, stalls, reset
+# PASS voxel case 0: 37 accepted outputs; signed coordinates, stalls, reset
+# PASS: all voxel cases completed
+# ** Note: $finish    : ../tb/voxel_tb.sv(233)
+#    Time: 950 ns  Iteration: 2  Instance: /voxel_tb
+# Break in Module voxel_tb at ../tb/voxel_tb.sv line 233
+# Stopped at ../tb/voxel_tb.sv line 233
+# End time: 20:05:50 on Sep 29,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0

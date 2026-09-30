@@ -1,0 +1,18 @@
+Reading pref.tcl
+
+# 2020.1
+
+# vsim -c -onfinish stop -t 1ps -sv_seed 20260929 -voptargs="+acc" -wlf waves/rf_packet_unpacker_tb.wlf work.rf_packet_unpacker_tb -do "simulate.do" 
+# Start time: 20:05:49 on Sep 29,2026
+# Loading sv_std.std
+# Loading work.rf_packet_unpacker_tb
+# Loading work.rf_packet_unpacker_wrapper
+# Loading work.rf_packet_unpacker
+# do simulate.do
+# PASS: 11 observations accepted, 56 AXI words forwarded; reset drops pending data
+# ** Note: $finish    : ../tb/rf_packet_unpacker_tb.sv(285)
+#    Time: 960 ns  Iteration: 1  Instance: /rf_packet_unpacker_tb
+# Break in Module rf_packet_unpacker_tb at ../tb/rf_packet_unpacker_tb.sv line 285
+# Stopped at ../tb/rf_packet_unpacker_tb.sv line 285
+# End time: 20:05:49 on Sep 29,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0

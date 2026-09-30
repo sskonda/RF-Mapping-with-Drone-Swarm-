@@ -1,0 +1,35 @@
+Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
+Start time: 20:05:46 on Sep 29,2026
+vlog -sv -work work ../rtl/axis_passthrough.sv ../rtl/rf_packet_unpacker.sv ../rtl/voxel.sv ../rtl/voxel_accumulator.sv ../rtl/voxel_lookup.sv ../rtl/axis_passthrough_wrapper.v ../rtl/rf_packet_unpacker_wrapper.v ../rtl/voxel_accumulator_wrapper.v ../rtl/voxel_lookup_wrapper.v ../rtl/voxel_wrapper.v ../tb/axis_passthrough_tb.sv ../tb/rf_packet_unpacker_tb.sv ../tb/rf_voxel_pipeline_tb.sv ../tb/tb_voxel_accumulator.sv ../tb/tb_voxel_accumulator_pipeline.sv ../tb/tb_voxel_lookup.sv ../tb/voxel_tb.sv 
+-- Compiling module axis_passthrough
+-- Compiling module rf_packet_unpacker
+-- Compiling module voxel
+-- Compiling module voxel_accumulator
+-- Compiling module voxel_lookup
+-- Compiling module axis_passthrough_wrapper
+-- Compiling module rf_packet_unpacker_wrapper
+-- Compiling module voxel_accumulator_wrapper
+-- Compiling module voxel_lookup_wrapper
+-- Compiling module voxel_wrapper
+-- Compiling module axis_passthrough_test_case
+-- Compiling module axis_passthrough_tb
+-- Compiling module rf_packet_unpacker_tb
+-- Compiling module rf_voxel_pipeline_tb
+-- Compiling module accumulator_case
+-- Compiling module tb_voxel_accumulator
+-- Compiling module tb_voxel_accumulator_pipeline
+-- Compiling module voxel_lookup_test
+-- Compiling module tb_voxel_lookup
+-- Compiling module voxel_test_case
+-- Compiling module voxel_tb
+
+Top level modules:
+	axis_passthrough_tb
+	rf_packet_unpacker_tb
+	rf_voxel_pipeline_tb
+	tb_voxel_accumulator
+	tb_voxel_accumulator_pipeline
+	tb_voxel_lookup
+	voxel_tb
+End time: 20:05:46 on Sep 29,2026, Elapsed time: 0:00:00
+Errors: 0, Warnings: 0

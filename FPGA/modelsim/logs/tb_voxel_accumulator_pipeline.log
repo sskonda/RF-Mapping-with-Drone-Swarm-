@@ -1,0 +1,21 @@
+Reading pref.tcl
+
+# 2020.1
+
+# vsim -c -onfinish stop -t 1ps -sv_seed 20260929 -voptargs="+acc" -wlf waves/tb_voxel_accumulator_pipeline.wlf work.tb_voxel_accumulator_pipeline -do "simulate.do" 
+# Start time: 20:05:56 on Sep 29,2026
+# Loading sv_std.std
+# Loading work.tb_voxel_accumulator_pipeline
+# Loading work.voxel
+# Loading work.voxel_lookup_wrapper
+# Loading work.voxel_lookup
+# Loading work.voxel_accumulator_wrapper
+# Loading work.voxel_accumulator
+# do simulate.do
+# PASS pipeline: 2008 observations/results, 396 rejected, 2907 upstream stall cycles
+# ** Note: $finish    : ../tb/tb_voxel_accumulator_pipeline.sv(162)
+#    Time: 69830 ns  Iteration: 1  Instance: /tb_voxel_accumulator_pipeline
+# Break in Module tb_voxel_accumulator_pipeline at ../tb/tb_voxel_accumulator_pipeline.sv line 162
+# Stopped at ../tb/tb_voxel_accumulator_pipeline.sv line 162
+# End time: 20:05:56 on Sep 29,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
