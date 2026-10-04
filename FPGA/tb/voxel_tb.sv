@@ -25,7 +25,7 @@ module voxel_test_case #(
     voxel_wrapper #(
         .X_ORIGIN_MM(X_ORIGIN_MM), .Y_ORIGIN_MM(Y_ORIGIN_MM),
         .Z_ORIGIN_MM(Z_ORIGIN_MM), .VOXEL_SIZE_MM(VOXEL_SIZE_MM)
-    ) dut (.*);
+    ) dut (.voxel_x(vx), .voxel_y(vy), .voxel_z(vz), .*);
 
     integer expected_x [0:127], expected_y [0:127], expected_z [0:127];
     integer expected_rssi [0:127];
@@ -82,7 +82,7 @@ module voxel_test_case #(
                     accepted_outputs = accepted_outputs + 1;
                 end else begin
                     stall_cycles = stall_cycles + 1;
-                    if (observation_ready !== 1'b0)
+                    if (write_index - read_index == 4 && observation_ready !== 1'b0)
                         $fatal(1, "Case %0d failed to backpressure its input", CASE_ID);
                 end
             end
@@ -124,9 +124,9 @@ module voxel_test_case #(
             observation_valid = 1'b0;
             voxel_ready = 1'b0;
             repeat (2) @(negedge aclk);
-            if (voxel_valid !== 1'b0 ||
-                {vx, vy, vz, voxel_rssi_dbm} !== 131'b0)
-                $fatal(1, "Case %0d reset did not clear outputs", CASE_ID);
+            // The four valid bits reset; invalid payloads need not be zero.
+            if (voxel_valid !== 1'b0)
+                $fatal(1, "Case %0d reset did not clear voxel_valid", CASE_ID);
             aresetn = 1'b1;
         end
     endtask
@@ -134,6 +134,7 @@ module voxel_test_case #(
     task automatic drain;
         begin
             voxel_ready = 1'b1;
+            do @(negedge aclk); while (read_index != write_index || voxel_valid);
             repeat (2) @(negedge aclk);
             if (read_index != write_index || voxel_valid !== 1'b0)
                 $fatal(1, "Case %0d lost an output or failed to clear valid", CASE_ID);
@@ -144,8 +145,11 @@ module voxel_test_case #(
         @(negedge aclk);
         reset_dut();
 
-        // Fill the output slot, then hold a second input through a long stall.
+        // Fill all four elastic stages, then hold a fifth input through a stall.
         send_observation(-1, -500, -501, -61);
+        send_observation(499, 500, 501, -58);
+        send_observation(-499, -500, -501, -59);
+        send_observation(1000, -1000, 0, -60);
         fork
             send_observation(0, 499, 500, -62);
             begin
@@ -154,7 +158,7 @@ module voxel_test_case #(
             end
         join
 
-        // Consecutive observations must consume and replace the output slot.
+        // Consecutive observations must sustain one transfer per clock.
         send_observation(501, 1000, -1000, -63);
         send_observation(1000000, -1000000, 300000, -64);
         send_observation(32'sh7fffffff, 32'sh80000000, 32'sh7fffffff, -65);

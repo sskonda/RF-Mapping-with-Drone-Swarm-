@@ -1,0 +1,20 @@
+Reading pref.tcl
+
+# 2020.1
+
+# vsim -c -onfinish stop -t 1ps -sv_seed 20260929 -voptargs="+acc" -wlf waves/rf_voxel_pipeline_tb.wlf work.rf_voxel_pipeline_tb -do "simulate.do" 
+# Start time: 20:05:51 on Sep 29,2026
+# Loading sv_std.std
+# Loading work.rf_voxel_pipeline_tb
+# Loading work.rf_packet_unpacker_wrapper
+# Loading work.rf_packet_unpacker
+# Loading work.voxel_wrapper
+# Loading work.voxel
+# do simulate.do
+# PASS: unpacker -> voxel: 8 observations, 32 AXI words; both sinks stalled
+# ** Note: $finish    : ../tb/rf_voxel_pipeline_tb.sv(167)
+#    Time: 650 ns  Iteration: 1  Instance: /rf_voxel_pipeline_tb
+# Break in Module rf_voxel_pipeline_tb at ../tb/rf_voxel_pipeline_tb.sv line 167
+# Stopped at ../tb/rf_voxel_pipeline_tb.sv line 167
+# End time: 20:05:51 on Sep 29,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0

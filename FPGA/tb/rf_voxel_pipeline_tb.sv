@@ -18,7 +18,7 @@ module rf_voxel_pipeline_tb;
     logic voxel_valid, voxel_ready = 1'b0;
 
     rf_packet_unpacker_wrapper unpacker (.*);
-    voxel_wrapper voxelizer (.*);
+    voxel_wrapper voxelizer (.voxel_x(vx), .voxel_y(vy), .voxel_z(vz), .*);
 
     integer words [0:31];
     integer expected_vx [0:7], expected_vy [0:7], expected_vz [0:7];
@@ -66,6 +66,13 @@ module rf_voxel_pipeline_tb;
                 (m_axis_tvalid !== 1'b1 || {m_axis_tdata, m_axis_tlast} !== held_axis))
                 $fatal(1, "Forwarded AXI word changed during a stall");
 
+            if (observation_valid && !observation_ready && s_axis_tvalid &&
+                input_count % 4 == 3) begin
+                full_stalls = full_stalls + 1;
+                if (s_axis_tready !== 1'b0)
+                    $fatal(1, "Full observation pipeline did not backpressure AXI");
+            end
+
             if (s_axis_tvalid && s_axis_tready)
                 input_count = input_count + 1;
             if (m_axis_tvalid && m_axis_tready) begin
@@ -90,11 +97,6 @@ module rf_voxel_pipeline_tb;
                     if (observation_valid && observation_ready)
                         overlap_count = overlap_count + 1;
                 end
-            end
-            if (observation_valid && !observation_ready && s_axis_tvalid) begin
-                full_stalls = full_stalls + 1;
-                if (s_axis_tready !== 1'b0)
-                    $fatal(1, "Full observation pipeline did not backpressure AXI");
             end
             previous_voxel_stall = voxel_valid && !voxel_ready;
             previous_observation_stall = observation_valid && !observation_ready;
@@ -132,17 +134,18 @@ module rf_voxel_pipeline_tb;
                 s_axis_tvalid = 1'b0;
             end
             begin
-                // Fill both registered observations before releasing the sink.
+                // Fill four voxel stages and the unpacker observation register.
+                // The next packet's X/Y/Z can still prefetch before RSSI blocks.
                 while (!(voxel_valid && observation_valid && !observation_ready))
                     @(negedge aclk);
-                repeat (6) @(negedge aclk);
-                if (input_count != 8 || forwarded_count != 8 || voxel_count != 0)
-                    $fatal(1, "Unexpected progress while both observation slots were full");
+                repeat (12) @(negedge aclk);
+                if (input_count != 23 || forwarded_count != 23 || voxel_count != 0)
+                    $fatal(1, "Unexpected progress while all five observation slots were full");
                 // Drain observations while independently stopping AXI forwarding.
                 m_axis_tready = 1'b0;
                 voxel_ready = 1'b1;
                 repeat (5) @(negedge aclk);
-                if (input_count != 8 || voxel_count != 2)
+                if (input_count != 23 || voxel_count != 5)
                     $fatal(1, "AXI stall incorrectly affected observation draining");
                 m_axis_tready = 1'b1;
                 repeat (6) @(negedge aclk);
@@ -157,7 +160,8 @@ module rf_voxel_pipeline_tb;
             $fatal(1, "Lost/duplicate pipeline data: input=%0d forwarded=%0d voxels=%0d",
                    input_count, forwarded_count, voxel_count);
         if (full_stalls < 6 || axis_stalls < 5 || voxel_stalls < 10 || overlap_count < 1)
-            $fatal(1, "Insufficient stall or simultaneous acceptance coverage");
+            $fatal(1, "Insufficient coverage: full=%0d axis=%0d voxel=%0d overlap=%0d",
+                   full_stalls, axis_stalls, voxel_stalls, overlap_count);
         $display("PASS: unpacker -> voxel: %0d observations, %0d AXI words; both sinks stalled",
                  voxel_count, forwarded_count);
         $finish;
