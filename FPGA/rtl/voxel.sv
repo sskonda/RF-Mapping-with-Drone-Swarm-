@@ -1,9 +1,10 @@
 /*
 Author: Sanat Konda
-Updated: Sept 23, 2026
+Updated: Oct 5, 2026
 
 Purpose: Convert positions into signed voxel coordinates for a sparse map.
 Four elastic stages: normalize, partial products, partial sums, output.
+Source metadata advances under the same enables as the RSSI payload.
 */
 
 module voxel #(
@@ -18,6 +19,8 @@ module voxel #(
     input  logic signed [31:0] y_mm,
     input  logic signed [31:0] z_mm,
     input  logic signed [31:0] rssi_dbm,
+    input logic [31:0] observation_drone_id,
+    input logic [63:0] observation_timestamp_us,
     input  logic               observation_valid,
     output logic               observation_ready,
 
@@ -25,6 +28,8 @@ module voxel #(
     output logic signed [32:0] voxel_y,
     output logic signed [32:0] voxel_z,
     output logic signed [31:0] voxel_rssi_dbm,
+    output logic [31:0] voxel_drone_id,
+    output logic [63:0] voxel_timestamp_us,
     output logic               voxel_valid,
     input  logic               voxel_ready
 );
@@ -40,6 +45,8 @@ module voxel #(
     logic signed [31:0] position [3];
     logic signed [32:0] coordinate [3];
     logic signed [31:0] rssi_pipe [4];
+    logic [31:0] drone_pipe [4];
+    logic [63:0] timestamp_pipe [4];
     logic [3:0] stage_valid, stage_ready;
 
     assign position[0] = x_mm;
@@ -49,6 +56,8 @@ module voxel #(
     assign voxel_y = coordinate[1];
     assign voxel_z = coordinate[2];
     assign voxel_rssi_dbm = rssi_pipe[3];
+    assign voxel_drone_id = drone_pipe[3];
+    assign voxel_timestamp_us = timestamp_pipe[3];
     assign voxel_valid = stage_valid[3];
     assign observation_ready = aresetn && stage_ready[0];
 
@@ -69,11 +78,18 @@ module voxel #(
         end
 
         // Payload registers need no reset; valid bits determine usability.
-        if (observation_valid && observation_ready)
+        if (observation_valid && observation_ready) begin
             rssi_pipe[0] <= rssi_dbm;
-        for (int stage = 1; stage < 4; stage++)
-            if (stage_valid[stage-1] && stage_ready[stage])
+            drone_pipe[0] <= observation_drone_id;
+            timestamp_pipe[0] <= observation_timestamp_us;
+        end
+        for (int stage = 1; stage < 4; stage++) begin
+            if (stage_valid[stage-1] && stage_ready[stage]) begin
                 rssi_pipe[stage] <= rssi_pipe[stage-1];
+                drone_pipe[stage] <= drone_pipe[stage-1];
+                timestamp_pipe[stage] <= timestamp_pipe[stage-1];
+            end
+        end
     end
 
     for (genvar axis = 0; axis < 3; axis++) begin : g_axis

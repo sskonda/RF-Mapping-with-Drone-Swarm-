@@ -1,6 +1,6 @@
 /*
 Author: Sanat Konda
-Updated: Sept 25, 2026
+Updated: Oct 5, 2026
 
 Purpose: Expose the voxel RSSI accumulator in Vivado's block design.
 The wrapper preserves the slot, signed sum, count, and valid/ready interfaces.
@@ -22,6 +22,8 @@ module voxel_accumulator_wrapper #(
     input  wire signed [31:0] lookup_rssi_dbm,
     input  wire lookup_new,
     input  wire lookup_rejected,
+    input wire [31:0] lookup_drone_id,
+    input wire [63:0] lookup_timestamp_us,
     input  wire lookup_valid,
     output wire lookup_ready,
 
@@ -31,6 +33,8 @@ module voxel_accumulator_wrapper #(
     output wire acc_new,
     output wire acc_rejected,
     output wire acc_overflow,
+    output wire [31:0] acc_drone_id,
+    output wire [63:0] acc_timestamp_us,
     output wire acc_valid,
     input  wire acc_ready
 );
@@ -45,6 +49,8 @@ module voxel_accumulator_wrapper #(
         .lookup_rssi_dbm(lookup_rssi_dbm),
         .lookup_new(lookup_new),
         .lookup_rejected(lookup_rejected),
+        .lookup_drone_id(lookup_drone_id),
+        .lookup_timestamp_us(lookup_timestamp_us),
         .lookup_valid(lookup_valid),
         .lookup_ready(lookup_ready),
         .acc_slot(acc_slot),
@@ -53,6 +59,8 @@ module voxel_accumulator_wrapper #(
         .acc_new(acc_new),
         .acc_rejected(acc_rejected),
         .acc_overflow(acc_overflow),
+        .acc_drone_id(acc_drone_id),
+        .acc_timestamp_us(acc_timestamp_us),
         .acc_valid(acc_valid),
         .acc_ready(acc_ready)
     );

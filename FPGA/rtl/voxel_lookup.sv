@@ -1,9 +1,10 @@
 /*
 Author: Sanat Konda
-Updated: Sept 24, 2026
+Updated: Oct 5, 2026
 
 Purpose: Assign stable storage slots to signed voxel coordinates.
 A BRAM hash table uses linear probing and valid/ready flow control.
+The spatial key excludes drone ID; each response retains its source metadata.
 */
 
 module voxel_lookup #(
@@ -16,6 +17,8 @@ module voxel_lookup #(
     input  logic signed [32:0] voxel_y,
     input  logic signed [32:0] voxel_z,
     input  logic signed [31:0] voxel_rssi_dbm,
+    input logic [31:0] voxel_drone_id,
+    input logic [63:0] voxel_timestamp_us,
     input  logic               voxel_valid,
     output logic               voxel_ready,
 
@@ -23,6 +26,8 @@ module voxel_lookup #(
     output logic signed [31:0] lookup_rssi_dbm,
     output logic               lookup_new,
     output logic               lookup_rejected,
+    output logic [31:0] lookup_drone_id,
+    output logic [63:0] lookup_timestamp_us,
     output logic               lookup_valid,
     input  logic               lookup_ready,
 
@@ -142,6 +147,8 @@ module voxel_lookup #(
         if (accept) begin
             request_key <= {voxel_x, voxel_y, voxel_z};
             lookup_rssi_dbm <= voxel_rssi_dbm;
+            lookup_drone_id <= voxel_drone_id;
+            lookup_timestamp_us <= voxel_timestamp_us;
             attempts <= '0;
         end else if (advance) begin
             attempts <= attempts + 1'b1;

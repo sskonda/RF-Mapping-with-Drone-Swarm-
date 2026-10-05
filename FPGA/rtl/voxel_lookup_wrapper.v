@@ -1,6 +1,6 @@
 /*
 Author: Sanat Konda
-Updated: Sept 24, 2026
+Updated: Oct 5, 2026
 
 Purpose: Expose the sparse voxel lookup module in Vivado's block design.
 The wrapper preserves the signed coordinate and valid/ready interfaces.
@@ -22,6 +22,8 @@ module voxel_lookup_wrapper #(
     input  wire signed [32:0] voxel_y,
     input  wire signed [32:0] voxel_z,
     input  wire signed [31:0] voxel_rssi_dbm,
+    input wire [31:0] voxel_drone_id,
+    input wire [63:0] voxel_timestamp_us,
     input  wire               voxel_valid,
     output wire               voxel_ready,
 
@@ -29,6 +31,8 @@ module voxel_lookup_wrapper #(
     output wire signed [31:0] lookup_rssi_dbm,
     output wire               lookup_new,
     output wire               lookup_rejected,
+    output wire [31:0] lookup_drone_id,
+    output wire [63:0] lookup_timestamp_us,
     output wire               lookup_valid,
     input  wire               lookup_ready,
 
@@ -47,12 +51,16 @@ module voxel_lookup_wrapper #(
         .voxel_y(voxel_y),
         .voxel_z(voxel_z),
         .voxel_rssi_dbm(voxel_rssi_dbm),
+        .voxel_drone_id(voxel_drone_id),
+        .voxel_timestamp_us(voxel_timestamp_us),
         .voxel_valid(voxel_valid),
         .voxel_ready(voxel_ready),
         .lookup_slot(lookup_slot),
         .lookup_rssi_dbm(lookup_rssi_dbm),
         .lookup_new(lookup_new),
         .lookup_rejected(lookup_rejected),
+        .lookup_drone_id(lookup_drone_id),
+        .lookup_timestamp_us(lookup_timestamp_us),
         .lookup_valid(lookup_valid),
         .lookup_ready(lookup_ready),
         .init_done(init_done),

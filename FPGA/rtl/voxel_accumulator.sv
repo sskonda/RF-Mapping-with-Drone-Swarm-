@@ -1,9 +1,10 @@
 /*
 Author: Sanat Konda
-Updated: Sept 25, 2026
+Updated: Oct 5, 2026
 
 Purpose: Accumulate RSSI sums and observation counts by sparse voxel slot.
 Synchronous BRAM updates use valid/ready flow control and initialize on lookup_new.
+Each output carries the ID and timestamp of its triggering observation.
 */
 
 module voxel_accumulator #(
@@ -17,6 +18,8 @@ module voxel_accumulator #(
     input  logic signed [31:0] lookup_rssi_dbm,
     input  logic               lookup_new,
     input  logic               lookup_rejected,
+    input logic [31:0] lookup_drone_id,
+    input logic [63:0] lookup_timestamp_us,
     input  logic               lookup_valid,
     output logic               lookup_ready,
 
@@ -26,6 +29,8 @@ module voxel_accumulator #(
     output logic               acc_new,
     output logic               acc_rejected,
     output logic               acc_overflow,
+    output logic [31:0] acc_drone_id,
+    output logic [63:0] acc_timestamp_us,
     output logic               acc_valid,
     input  logic               acc_ready
 );
@@ -92,6 +97,8 @@ module voxel_accumulator #(
         // Reset only control bits. Payload is meaningful while acc_valid is high.
         if (accept) begin
             acc_slot <= lookup_slot;
+            acc_drone_id <= lookup_drone_id;
+            acc_timestamp_us <= lookup_timestamp_us;
             acc_new <= lookup_new;
             pending_rssi <= lookup_rssi_dbm;
             pending_rejected <= lookup_rejected || invalid_slot;

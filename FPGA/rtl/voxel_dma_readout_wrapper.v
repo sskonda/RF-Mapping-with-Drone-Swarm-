@@ -1,6 +1,6 @@
 /*
 Author: Sanat Konda
-Updated: Oct 4, 2026
+Updated: Oct 5, 2026
 
 Purpose: Connect the accumulator readout to the existing AXI DMA receive path.
 S_AXIS drains the unpacker's original echo; M_AXIS returns accumulator results.
@@ -32,6 +32,8 @@ module voxel_dma_readout_wrapper #(
     input wire acc_new,
     input wire acc_rejected,
     input wire acc_overflow,
+    input wire [31:0] acc_drone_id,
+    input wire [63:0] acc_timestamp_us,
     input wire acc_valid,
     output wire acc_ready,
 
@@ -63,6 +65,8 @@ module voxel_dma_readout_wrapper #(
         .acc_new(acc_new),
         .acc_rejected(acc_rejected),
         .acc_overflow(acc_overflow),
+        .acc_drone_id(acc_drone_id),
+        .acc_timestamp_us(acc_timestamp_us),
         .acc_valid(acc_valid),
         .acc_ready(acc_ready),
         .m_axis_tdata(m_axis_tdata),

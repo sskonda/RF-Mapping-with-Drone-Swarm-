@@ -1,6 +1,6 @@
 /*
 Author: Sanat Konda
-Updated: Oct 4, 2026
+Updated: Oct 5, 2026
 
 Purpose: Verify result packet serialization, signed extension, and flow control.
 Check each word, TKEEP, TLAST, stalls, packet replacement, and partial-packet reset.
@@ -21,6 +21,9 @@ module readout_case #(
     logic signed [SUM_WIDTH-1:0] acc_rssi_sum = 0;
     logic [COUNT_WIDTH-1:0] acc_count = 0;
     logic acc_new = 0, acc_rejected = 0, acc_overflow = 0, acc_valid = 0;
+    logic [31:0] acc_drone_id = 0;
+    logic [63:0] acc_timestamp_us = 0;
+    int request_number = 0;
     wire acc_ready;
     wire [31:0] m_axis_tdata;
     wire [3:0] m_axis_tkeep;
@@ -35,6 +38,7 @@ module readout_case #(
 
     voxel_dma_readout #(.MAX_VOXELS(MAX_VOXELS), .COUNT_WIDTH(COUNT_WIDTH)) dut (
         .aclk, .aresetn, .acc_slot, .acc_rssi_sum, .acc_count,
+        .acc_drone_id, .acc_timestamp_us,
         .acc_new, .acc_rejected, .acc_overflow, .acc_valid, .acc_ready,
         .m_axis_tdata, .m_axis_tkeep, .m_axis_tvalid, .m_axis_tready, .m_axis_tlast
     );
@@ -64,8 +68,8 @@ module readout_case #(
             if (held) stalls++;
             if (acc_valid && acc_ready) begin
                 if (check_burst) begin
-                    if (burst_accepted != 0 && cycle - last_burst_cycle != 5)
-                        $fatal(1, "Continuous results did not accept every five clocks");
+                    if (burst_accepted != 0 && cycle - last_burst_cycle != 8)
+                        $fatal(1, "Continuous results did not accept every eight clocks");
                     last_burst_cycle = cycle;
                     burst_accepted++;
                 end
@@ -76,16 +80,19 @@ module readout_case #(
                 expected.push_back(32'(acc_count));
                 expected.push_back(32'(acc_new) | (32'(acc_rejected) << 1) |
                                    (32'(acc_overflow) << 2));
+                expected.push_back(acc_drone_id);
+                expected.push_back(acc_timestamp_us[31:0]);
+                expected.push_back(acc_timestamp_us[63:32]);
                 accepted++;
             end
             if (m_axis_tvalid && m_axis_tready) begin
                 if (expected.size() == 0) $fatal(1, "Unexpected output word");
                 wanted = expected.pop_front();
                 if (m_axis_tdata !== wanted || m_axis_tkeep !== 4'hf ||
-                    m_axis_tlast !== (position == 4))
+                    m_axis_tlast !== (position == 7))
                     $fatal(1, "Packet word mismatch at position %0d", position);
                 words++;
-                if (position == 4) begin
+                if (position == 7) begin
                     packets++;
                     position = 0;
                 end else position++;
@@ -96,6 +103,9 @@ module readout_case #(
     task automatic send(input int slot, input longint signed sum,
                         input int unsigned count, input logic [2:0] flags);
         @(negedge aclk);
+        request_number++;
+        acc_drone_id = (request_number % 2 != 0) ? 32'hffffffff : 32'd202;
+        acc_timestamp_us = {$urandom(), $urandom()};
         acc_slot = SLOT_WIDTH'(slot);
         acc_rssi_sum = SUM_WIDTH'(sum);
         acc_count = COUNT_WIDTH'(count);
@@ -129,18 +139,18 @@ module readout_case #(
         send(0, 0, 0, 3'b010);
         drain();
 
-        // Hold the final word: TLAST, flags, and valid must remain stable.
+        // Hold the final word: TLAST, timestamp high, and valid must remain stable.
         ready_mode = 0;
         start_words = words;
         send(0, -193, 3, 0);
-        wait (words == start_words + 4);
+        wait (words == start_words + 7);
         ready_mode = 2;
         repeat (20) @(negedge aclk);
         ready_mode = 0;
         drain();
 
-        // Reset after 0 through 4 transferred words; discard the partial packet.
-        for (int partial = 0; partial < 5; partial++) begin
+        // Reset after 0 through 7 transferred words; discard the partial packet.
+        for (int partial = 0; partial < 8; partial++) begin
             ready_mode = 2;
             repeat (2) @(negedge aclk);
             start_words = words;
@@ -166,7 +176,7 @@ module readout_case #(
         for (int i = 0; i < 20; i++) send(0, -64'sd63-longint'(i), i+1, 0);
         check_burst = 0;
         drain();
-        if (accepted != packets + aborted || aborted != 5 ||
+        if (accepted != packets + aborted || aborted != 8 ||
             burst_accepted != 20 || stalls == 0)
             $fatal(1, "Readout coverage/accounting failure");
         $display("PASS readout MAX=%0d COUNT=%0d: packets=%0d reset_aborts=%0d stalls=%0d",

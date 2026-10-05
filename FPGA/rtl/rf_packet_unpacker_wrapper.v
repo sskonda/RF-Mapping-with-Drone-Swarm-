@@ -1,3 +1,10 @@
+/*
+Author: Sanat Konda
+Updated: Oct 5, 2026
+
+Purpose: Expose the observation interface in Vivado with source metadata.
+*/
+
 module rf_packet_unpacker_wrapper #(
     parameter integer DATA_WIDTH = 32
 ) (
@@ -31,6 +38,8 @@ module rf_packet_unpacker_wrapper #(
     output wire signed [DATA_WIDTH-1:0] y_mm,
     output wire signed [DATA_WIDTH-1:0] z_mm,
     output wire signed [DATA_WIDTH-1:0] rssi_dbm,
+    output wire [31:0] observation_drone_id,
+    output wire [63:0] observation_timestamp_us,
     output wire                         observation_valid,
     input  wire                         observation_ready
 );
@@ -52,6 +61,8 @@ module rf_packet_unpacker_wrapper #(
         .y_mm(y_mm),
         .z_mm(z_mm),
         .rssi_dbm(rssi_dbm),
+        .observation_drone_id(observation_drone_id),
+        .observation_timestamp_us(observation_timestamp_us),
         .observation_valid(observation_valid),
         .observation_ready(observation_ready)
     );
