@@ -24,6 +24,8 @@ module voxel_lookup_test #(
     logic aresetn = 1'b0;
     logic signed [32:0] voxel_x = '0, voxel_y = '0, voxel_z = '0;
     logic signed [31:0] voxel_rssi_dbm = '0;
+    logic [31:0] voxel_drone_id = 0, lookup_drone_id;
+    logic [63:0] voxel_timestamp_us = 0, lookup_timestamp_us;
     logic voxel_valid = 1'b0, voxel_ready;
     logic [SLOT_WIDTH-1:0] lookup_slot;
     logic signed [31:0] lookup_rssi_dbm;
@@ -40,12 +42,14 @@ module voxel_lookup_test #(
         logic [SLOT_WIDTH-1:0] slot;
         logic signed [31:0] rssi;
         logic is_new, rejected;
+        logic [31:0] drone;
+        logic [63:0] stamp;
         int count_after, accepted_cycle;
     } response_t;
 
     logic [98:0] model_keys [$];
     response_t expected [$];
-    logic [SLOT_WIDTH+33:0] stalled_payload;
+    logic [SLOT_WIDTH+129:0] stalled_payload;
     bit was_stalled = 0;
     bit random_sink = 0, force_ready = 1;
     int cycles = 0, accepted = 0, received = 0, aborted = 0;
@@ -83,14 +87,14 @@ module voxel_lookup_test #(
 
             if (was_stalled) begin
                 if (!lookup_valid ||
-                    {lookup_slot, lookup_rssi_dbm, lookup_new, lookup_rejected}
+                    {lookup_slot, lookup_rssi_dbm, lookup_new, lookup_rejected, lookup_drone_id, lookup_timestamp_us}
                         !== stalled_payload)
                     $fatal(1, "Output changed under backpressure");
                 stall_checks++;
             end
             was_stalled = lookup_valid && !lookup_ready;
             stalled_payload = {lookup_slot, lookup_rssi_dbm,
-                               lookup_new, lookup_rejected};
+                               lookup_new, lookup_rejected, lookup_drone_id, lookup_timestamp_us};
 
             if (voxel_valid && voxel_ready) begin
                 key = {voxel_x, voxel_y, voxel_z};
@@ -101,6 +105,8 @@ module voxel_lookup_test #(
 
                 item = '0;
                 item.rssi = voxel_rssi_dbm;
+                item.drone = voxel_drone_id;
+                item.stamp = voxel_timestamp_us;
                 item.accepted_cycle = cycles;
                 if (slot >= 0) begin
                     item.slot = SLOT_WIDTH'(slot);
@@ -120,8 +126,8 @@ module voxel_lookup_test #(
                 if (expected.size() == 0)
                     $fatal(1, "Unexpected response");
                 item = expected.pop_front();
-                if ({lookup_slot, lookup_rssi_dbm, lookup_new, lookup_rejected}
-                    !== {item.slot, item.rssi, item.is_new, item.rejected})
+                if ({lookup_slot, lookup_rssi_dbm, lookup_new, lookup_rejected, lookup_drone_id, lookup_timestamp_us}
+                    !== {item.slot, item.rssi, item.is_new, item.rejected, item.drone, item.stamp})
                     $fatal(1, "Response mismatch MAX=%0d response=%0d",
                            MAX_VOXELS, received);
                 if (int'(used_voxels) != item.count_after ||
@@ -146,6 +152,8 @@ module voxel_lookup_test #(
         voxel_y = y;
         voxel_z = z;
         voxel_rssi_dbm = rssi;
+        voxel_drone_id = random_word(source_rng);
+        voxel_timestamp_us = {random_word(source_rng), random_word(source_rng)};
         voxel_valid = 1'b1;
         do @(posedge aclk); while (!voxel_ready);
         @(negedge aclk);

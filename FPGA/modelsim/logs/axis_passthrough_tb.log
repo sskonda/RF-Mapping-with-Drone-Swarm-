@@ -3,7 +3,7 @@ Reading pref.tcl
 # 2020.1
 
 # vsim -c -onfinish stop -t 1ps -sv_seed 20260929 -voptargs="+acc" -wlf waves/axis_passthrough_tb.wlf work.axis_passthrough_tb -do "simulate.do" 
-# Start time: 20:05:48 on Sep 29,2026
+# Start time: 01:05:29 on Oct 06,2026
 # Loading sv_std.std
 # Loading work.axis_passthrough_tb
 # Loading work.axis_passthrough_test_case
@@ -18,5 +18,5 @@ Reading pref.tcl
 #    Time: 1900 ns  Iteration: 2  Instance: /axis_passthrough_tb
 # Break in Module axis_passthrough_tb at ../tb/axis_passthrough_tb.sv line 179
 # Stopped at ../tb/axis_passthrough_tb.sv line 179
-# End time: 20:05:48 on Sep 29,2026, Elapsed time: 0:00:00
+# End time: 01:05:30 on Oct 06,2026, Elapsed time: 0:00:01
 # Errors: 0, Warnings: 0

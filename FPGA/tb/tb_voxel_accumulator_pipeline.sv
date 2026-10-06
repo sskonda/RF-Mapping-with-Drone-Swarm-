@@ -14,6 +14,10 @@ module tb_voxel_accumulator_pipeline;
     always #5 aclk = ~aclk;
     logic aresetn = 0, observation_valid = 0;
     logic signed [31:0] x_mm = 0, y_mm = 0, z_mm = 0, rssi_dbm = 0;
+    logic [31:0] observation_drone_id = 0;
+    logic [63:0] observation_timestamp_us = 0;
+    wire [31:0] voxel_drone_id, lookup_drone_id, acc_drone_id;
+    wire [63:0] voxel_timestamp_us, lookup_timestamp_us, acc_timestamp_us;
     wire observation_ready, voxel_valid, voxel_ready;
     wire signed [32:0] voxel_x, voxel_y, voxel_z;
     wire signed [31:0] voxel_rssi_dbm, lookup_rssi_dbm;
@@ -29,17 +33,20 @@ module tb_voxel_accumulator_pipeline;
 
     voxel converter (
         .aclk, .aresetn, .x_mm, .y_mm, .z_mm, .rssi_dbm,
+        .observation_drone_id, .observation_timestamp_us, .voxel_drone_id, .voxel_timestamp_us,
         .observation_valid, .observation_ready, .voxel_x, .voxel_y, .voxel_z,
         .voxel_rssi_dbm, .voxel_valid, .voxel_ready
     );
     voxel_lookup_wrapper #(.MAX_VOXELS(MAX_VOXELS), .TABLE_SIZE(16)) lookup (
         .aclk, .aresetn, .voxel_x, .voxel_y, .voxel_z, .voxel_rssi_dbm,
+        .voxel_drone_id, .voxel_timestamp_us, .lookup_drone_id, .lookup_timestamp_us,
         .voxel_valid, .voxel_ready, .lookup_slot, .lookup_rssi_dbm,
         .lookup_new, .lookup_rejected, .lookup_valid, .lookup_ready,
         .init_done, .map_full, .used_voxels
     );
     voxel_accumulator_wrapper #(.MAX_VOXELS(MAX_VOXELS)) accumulator (
         .aclk, .aresetn, .lookup_slot, .lookup_rssi_dbm, .lookup_new,
+        .lookup_drone_id, .lookup_timestamp_us, .acc_drone_id, .acc_timestamp_us,
         .lookup_rejected, .lookup_valid, .lookup_ready, .acc_slot,
         .acc_rssi_sum, .acc_count, .acc_new, .acc_rejected,
         .acc_overflow, .acc_valid, .acc_ready
@@ -50,6 +57,8 @@ module tb_voxel_accumulator_pipeline;
         logic signed [63:0] sum;
         logic [31:0] count;
         bit is_new, rejected;
+        logic [31:0] drone;
+        logic [63:0] stamp;
     } result_t;
     result_t expected[$], result;
     logic [98:0] keys [MAX_VOXELS];
@@ -82,6 +91,8 @@ module tb_voxel_accumulator_pipeline;
                 for (int i = 0; i < occupied; i++)
                     if (keys[i] == key) slot = i;
                 result = '0;
+                result.drone = observation_drone_id;
+                result.stamp = observation_timestamp_us;
                 if (slot == -1 && occupied < MAX_VOXELS) begin
                     slot = occupied++;
                     keys[slot] = key;
@@ -104,7 +115,7 @@ module tb_voxel_accumulator_pipeline;
             if (acc_valid && acc_ready) begin
                 if (expected.size() == 0) $fatal(1, "Unexpected pipeline result");
                 result = expected.pop_front();
-                if ({acc_slot, acc_rssi_sum, acc_count, acc_new, acc_rejected} !== result || acc_overflow)
+                if ({acc_slot, acc_rssi_sum, acc_count, acc_new, acc_rejected, acc_drone_id, acc_timestamp_us} !== result || acc_overflow)
                     $fatal(1, "Pipeline mismatch at response %0d", received);
                 received++;
                 if (acc_rejected) rejected++;
@@ -115,6 +126,8 @@ module tb_voxel_accumulator_pipeline;
     task automatic send(input int signed x, y, z, rssi);
         @(negedge aclk);
         x_mm = x; y_mm = y; z_mm = z; rssi_dbm = rssi;
+        observation_drone_id = $urandom();
+        observation_timestamp_us = {$urandom(), $urandom()};
         observation_valid = 1;
         do @(posedge aclk); while (!observation_ready);
         @(negedge aclk);

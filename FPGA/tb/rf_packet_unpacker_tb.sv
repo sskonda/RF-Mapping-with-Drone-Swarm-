@@ -16,6 +16,11 @@ module rf_packet_unpacker_tb;
     logic m_axis_tvalid, m_axis_tready, m_axis_tlast;
     logic signed [31:0] x_mm, y_mm, z_mm, rssi_dbm;
     logic observation_valid, observation_ready;
+    logic [31:0] observation_drone_id;
+    logic [63:0] observation_timestamp_us;
+    logic [31:0] expected_id [0:63];
+    logic [63:0] expected_time [0:63];
+    int serial = 0;
 
     rf_packet_unpacker_wrapper dut (.*);
 
@@ -35,7 +40,7 @@ module rf_packet_unpacker_tb;
 
     logic previous_observation_stall = 1'b0;
     logic previous_axis_stall = 1'b0;
-    logic [127:0] held_observation;
+    logic [223:0] held_observation;
     logic [31:0] held_axis_data;
     logic held_axis_last;
 
@@ -59,21 +64,20 @@ module rf_packet_unpacker_tb;
 
             if (previous_observation_stall &&
                 (observation_valid !== 1'b1 ||
-                 {x_mm, y_mm, z_mm, rssi_dbm} !== held_observation))
+                 {x_mm, y_mm, z_mm, rssi_dbm, observation_drone_id, observation_timestamp_us} !== held_observation))
                 $fatal(1, "Pending observation changed or valid dropped before acceptance");
 
             if (observation_valid && !observation_ready) begin
                 observation_stall_cycles = observation_stall_cycles + 1;
-                // X/Y/Z may prefetch; only RSSI requires a free observation slot.
-                if (packet_field == 3 &&
+                // Six words may prefetch; timestamp high requires a free observation slot.
+                if (packet_field == 6 &&
                     (s_axis_tready !== 1'b0 || m_axis_tvalid !== 1'b0))
-                    $fatal(1, "Pending observation did not block the next RSSI word");
+                    $fatal(1, "Pending observation did not block the next timestamp high word");
             end
 
             if (s_axis_tvalid && s_axis_tready) begin
                 input_words = input_words + 1;
-                packet_field = (s_axis_tlast || packet_field == 3) ?
-                               0 : packet_field + 1;
+                packet_field = s_axis_tlast ? 0 : (packet_field < 7 ? packet_field + 1 : 7);
             end
             if (m_axis_tvalid && m_axis_tready) begin
                 output_words = output_words + 1;
@@ -87,7 +91,9 @@ module rf_packet_unpacker_tb;
                 if (x_mm !== expected_x[expected_read] ||
                     y_mm !== expected_y[expected_read] ||
                     z_mm !== expected_z[expected_read] ||
-                    rssi_dbm !== expected_rssi[expected_read])
+                    rssi_dbm !== expected_rssi[expected_read] ||
+                    observation_drone_id !== expected_id[expected_read] ||
+                    observation_timestamp_us !== expected_time[expected_read])
                     $fatal(1, "Observation mismatch: got (%0d, %0d, %0d, %0d)",
                            x_mm, y_mm, z_mm, rssi_dbm);
                 if (observation_ready) begin
@@ -99,7 +105,7 @@ module rf_packet_unpacker_tb;
             end
 
             previous_observation_stall = observation_valid && !observation_ready;
-            held_observation = {x_mm, y_mm, z_mm, rssi_dbm};
+            held_observation = {x_mm, y_mm, z_mm, rssi_dbm, observation_drone_id, observation_timestamp_us};
             previous_axis_stall = m_axis_tvalid && !m_axis_tready;
             held_axis_data = m_axis_tdata;
             held_axis_last = m_axis_tlast;
@@ -118,6 +124,9 @@ module rf_packet_unpacker_tb;
             expected_y[expected_write] = y;
             expected_z[expected_write] = z;
             expected_rssi[expected_write] = rssi;
+            serial++;
+            expected_id[expected_write] = (serial % 2) ? 32'hffffffff : 0;
+            expected_time[expected_write] = 64'hfffffffffffffffa + 64'(serial);
             expected_write = expected_write + 1;
         end
     endtask
@@ -142,11 +151,14 @@ module rf_packet_unpacker_tb;
         input logic last
     );
         begin
-            expect_observation(x, y, z, rssi);
+            if (last) expect_observation(x, y, z, rssi);
             send_word(x, 1'b0);
             send_word(y, 1'b0);
             send_word(z, 1'b0);
-            send_word(rssi, last);
+            send_word(rssi, 0);
+            send_word(last ? expected_id[expected_write-1] : 0, 0);
+            send_word(last ? expected_time[expected_write-1][31:0] : 0, 0);
+            send_word(last ? expected_time[expected_write-1][63:32] : 0, last);
         end
     endtask
 
@@ -193,10 +205,10 @@ module rf_packet_unpacker_tb;
         fork
             send_packet(101, 202, 303, -77, 1'b1);
             begin
-                repeat (8) @(negedge aclk);
-                if (input_words != words_before_stall + 3 ||
-                    output_words != words_before_stall + 3 || accepted_observations != 0)
-                    $fatal(1, "Expected exactly X/Y/Z to prefetch during the observation stall");
+                repeat (12) @(negedge aclk);
+                if (input_words != words_before_stall + 6 ||
+                    output_words != words_before_stall + 6 || accepted_observations != 0)
+                    $fatal(1, "Expected exactly six words to prefetch during the observation stall");
                 observation_ready = 1'b1;
             end
         join
@@ -214,7 +226,10 @@ module rf_packet_unpacker_tb;
             end
         join
         send_word(600, 1'b0);
-        send_word(-88, 1'b1);
+        send_word(-88, 0);
+        send_word(expected_id[expected_write-1], 0);
+        send_word(expected_time[expected_write-1][31:0], 0);
+        send_word(expected_time[expected_write-1][63:32], 1);
         drain_observations();
 
         // Consume an observation while the next X is AXI-stalled. Dropping
@@ -238,12 +253,18 @@ module rf_packet_unpacker_tb;
         join
         send_word(-2, 1'b0);
         send_word(-3, 1'b0);
-        send_word(-100, 1'b1);
+        send_word(-100, 0);
+        send_word(expected_id[expected_write-1], 0);
+        send_word(expected_time[expected_write-1][31:0], 0);
+        send_word(expected_time[expected_write-1][63:32], 1);
         drain_observations();
 
-        // Continuous traffic, signed extremes, and a fourth word without TLAST.
+        // Missing final TLAST discards until the next TLAST, including a whole following frame.
         send_packet(32'sh80000000, 32'sh7fffffff, 0, -1, 1'b1);
+        send_packet(0, -1, 500, -50, 1'b1);
         send_packet(11, 22, 33, -44, 1'b0);
+        send_packet(55, 66, 77, -88, 1'b0);
+        send_word(0, 1);
         send_packet(55, 66, 77, -88, 1'b1);
         drain_observations();
 
@@ -274,12 +295,12 @@ module rf_packet_unpacker_tb;
         send_packet(10, 20, 30, -40, 1'b1);
         drain_observations();
 
-        if (accepted_observations != 11 || input_words != 56 || output_words != 56)
+        if (accepted_observations != 11 || input_words != 107 || output_words != 107)
             $fatal(1, "Wrong totals: observations=%0d input=%0d output=%0d",
                    accepted_observations, input_words, output_words);
         if (simultaneous_transfers < 3 || observation_stall_cycles < 10 ||
             axis_stall_cycles < 5)
-            $fatal(1, "Required backpressure/overlap coverage was not exercised");
+            $fatal(1, "Required coverage: overlap=%0d observation_stalls=%0d axis_stalls=%0d", simultaneous_transfers, observation_stall_cycles, axis_stall_cycles);
         $display("PASS: %0d observations accepted, %0d AXI words forwarded; reset drops pending data",
                  accepted_observations, output_words);
         $finish;

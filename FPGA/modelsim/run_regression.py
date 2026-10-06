@@ -4,6 +4,8 @@
 import argparse
 from datetime import datetime, timezone
 import json
+import hashlib
+import time
 import os
 from pathlib import Path
 import re
@@ -12,6 +14,8 @@ import sys
 
 ROOT = Path(__file__).resolve().parent
 TESTS = {
+    "tb_voxel_dma_readout": "PASS all readout configurations",
+    "tb_voxel_dma_pipeline": "PASS all DMA pipeline configurations",
     "axis_passthrough_tb": "PASS: all axis passthrough configurations",
     "rf_packet_unpacker_tb": "PASS: 11 observations accepted",
     "voxel_tb": "PASS: all voxel cases completed",
@@ -71,6 +75,8 @@ def main():
                     str(install / "modelsim_ase/linuxaloem/vlog")]
         compiler_env["LD_LIBRARY_PATH"] = str(libs)
     summary["sources"] = source_names
+    summary["sha256"] = {name: hashlib.sha256(path.read_bytes()).hexdigest() for name, path in zip(source_names, sources)}
+    started = time.monotonic()
     output, passed = invoke(compiler + ["-sv", "-work", "work"] + source_names,
                             logs / "compile.log", compiler_env)
     if not passed:
@@ -104,6 +110,7 @@ def main():
         summary_path.write_text(json.dumps(summary, indent=2) + "\n")
     passed = all(test["status"] == "PASS" for test in summary["tests"])
     summary["status"] = "PASS" if passed else "FAIL"
+    summary["duration_seconds"] = time.monotonic() - started
     summary["finished_utc"] = datetime.now(timezone.utc).isoformat()
     summary_path.write_text(json.dumps(summary, indent=2) + "\n")
     print(f"{sum(t['status'] == 'PASS' for t in summary['tests'])}/{len(TESTS)} tests passed.")

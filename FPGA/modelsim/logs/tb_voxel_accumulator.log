@@ -3,7 +3,7 @@ Reading pref.tcl
 # 2020.1
 
 # vsim -c -onfinish stop -t 1ps -sv_seed 20260929 -voptargs="+acc" -wlf waves/tb_voxel_accumulator.wlf work.tb_voxel_accumulator -do "simulate.do" 
-# Start time: 20:05:54 on Sep 29,2026
+# Start time: 01:05:37 on Oct 06,2026
 # Loading sv_std.std
 # Loading work.tb_voxel_accumulator
 # Loading work.accumulator_case
@@ -14,9 +14,9 @@ Reading pref.tcl
 # PASS MAX=5 COUNT=3: received=1547 aborted=2 rejected=1488 overflow=1397 stalled=525
 # PASS MAX=1024 COUNT=32: received=2552 aborted=2 rejected=90 overflow=0 stalled=525
 # PASS: all accumulator configurations
-# ** Note: $finish    : ../tb/tb_voxel_accumulator.sv(249)
+# ** Note: $finish    : ../tb/tb_voxel_accumulator.sv(259)
 #    Time: 56720 ns  Iteration: 2  Instance: /tb_voxel_accumulator
-# Break in Module tb_voxel_accumulator at ../tb/tb_voxel_accumulator.sv line 249
-# Stopped at ../tb/tb_voxel_accumulator.sv line 249
-# End time: 20:05:55 on Sep 29,2026, Elapsed time: 0:00:01
+# Break in Module tb_voxel_accumulator at ../tb/tb_voxel_accumulator.sv line 259
+# Stopped at ../tb/tb_voxel_accumulator.sv line 259
+# End time: 01:05:37 on Oct 06,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0

@@ -14,31 +14,36 @@ module rf_voxel_pipeline_tb;
     logic m_axis_tvalid, m_axis_tready = 1'b1, m_axis_tlast;
     logic signed [31:0] x_mm, y_mm, z_mm, rssi_dbm, voxel_rssi_dbm;
     logic observation_valid, observation_ready;
+    logic [31:0] observation_drone_id, voxel_drone_id;
+    logic [63:0] observation_timestamp_us, voxel_timestamp_us;
     logic signed [32:0] vx, vy, vz;
     logic voxel_valid, voxel_ready = 1'b0;
 
     rf_packet_unpacker_wrapper unpacker (.*);
     voxel_wrapper voxelizer (.voxel_x(vx), .voxel_y(vy), .voxel_z(vz), .*);
 
-    integer words [0:31];
+    integer words [0:55];
     integer expected_vx [0:7], expected_vy [0:7], expected_vz [0:7];
     integer input_count = 0, forwarded_count = 0, voxel_count = 0;
     integer full_stalls = 0, axis_stalls = 0, voxel_stalls = 0;
     integer overlap_count = 0;
     logic previous_voxel_stall = 1'b0, previous_observation_stall = 1'b0;
     logic previous_axis_stall = 1'b0;
-    logic [130:0] held_voxel;
-    logic [127:0] held_observation;
+    logic [226:0] held_voxel;
+    logic [223:0] held_observation;
     logic [32:0] held_axis;
 
     // Explicit expected coordinates test negative floor division independently.
     task automatic packet(
         input integer index, x, y, z, rssi, expect_x, expect_y, expect_z
     );
-        words[4*index] = x;
-        words[4*index+1] = y;
-        words[4*index+2] = z;
-        words[4*index+3] = rssi;
+        words[7*index] = x;
+        words[7*index+1] = y;
+        words[7*index+2] = z;
+        words[7*index+3] = rssi;
+        words[7*index+4] = index % 2 ? -1 : 0;
+        words[7*index+5] = -1-index;
+        words[7*index+6] = index;
         expected_vx[index] = expect_x;
         expected_vy[index] = expect_y;
         expected_vz[index] = expect_z;
@@ -56,18 +61,18 @@ module rf_voxel_pipeline_tb;
                 $fatal(1, "AXI input and forwarding handshakes diverged");
             if (previous_voxel_stall &&
                 (voxel_valid !== 1'b1 ||
-                 {vx, vy, vz, voxel_rssi_dbm} !== held_voxel))
+                 {vx, vy, vz, voxel_rssi_dbm, voxel_drone_id, voxel_timestamp_us} !== held_voxel))
                 $fatal(1, "Voxel changed or valid dropped before acceptance");
             if (previous_observation_stall &&
                 (observation_valid !== 1'b1 ||
-                 {x_mm, y_mm, z_mm, rssi_dbm} !== held_observation))
+                 {x_mm, y_mm, z_mm, rssi_dbm, observation_drone_id, observation_timestamp_us} !== held_observation))
                 $fatal(1, "Unpacker observation changed while voxelizer stalled");
             if (previous_axis_stall &&
                 (m_axis_tvalid !== 1'b1 || {m_axis_tdata, m_axis_tlast} !== held_axis))
                 $fatal(1, "Forwarded AXI word changed during a stall");
 
             if (observation_valid && !observation_ready && s_axis_tvalid &&
-                input_count % 4 == 3) begin
+                input_count % 7 == 6) begin
                 full_stalls = full_stalls + 1;
                 if (s_axis_tready !== 1'b0)
                     $fatal(1, "Full observation pipeline did not backpressure AXI");
@@ -76,10 +81,10 @@ module rf_voxel_pipeline_tb;
             if (s_axis_tvalid && s_axis_tready)
                 input_count = input_count + 1;
             if (m_axis_tvalid && m_axis_tready) begin
-                if (forwarded_count >= 32)
+                if (forwarded_count >= 56)
                     $fatal(1, "Duplicate forwarded AXI word");
                 if (m_axis_tdata !== words[forwarded_count] ||
-                    m_axis_tlast !== (forwarded_count % 4 == 3))
+                    m_axis_tlast !== (forwarded_count % 7 == 6))
                     $fatal(1, "Forwarded word/TLAST mismatch at word %0d", forwarded_count);
                 forwarded_count = forwarded_count + 1;
             end
@@ -89,7 +94,9 @@ module rf_voxel_pipeline_tb;
                 if (vx !== 33'(expected_vx[voxel_count]) ||
                     vy !== 33'(expected_vy[voxel_count]) ||
                     vz !== 33'(expected_vz[voxel_count]) ||
-                    voxel_rssi_dbm !== words[4*voxel_count+3])
+                    voxel_rssi_dbm !== words[7*voxel_count+3] ||
+                    voxel_drone_id !== words[7*voxel_count+4] ||
+                    voxel_timestamp_us !== {words[7*voxel_count+6], words[7*voxel_count+5]})
                     $fatal(1, "Voxel %0d mismatch: (%0d,%0d,%0d) RSSI %0d",
                            voxel_count, vx, vy, vz, voxel_rssi_dbm);
                 if (voxel_ready) begin
@@ -101,8 +108,8 @@ module rf_voxel_pipeline_tb;
             previous_voxel_stall = voxel_valid && !voxel_ready;
             previous_observation_stall = observation_valid && !observation_ready;
             previous_axis_stall = m_axis_tvalid && !m_axis_tready;
-            held_voxel = {vx, vy, vz, voxel_rssi_dbm};
-            held_observation = {x_mm, y_mm, z_mm, rssi_dbm};
+            held_voxel = {vx, vy, vz, voxel_rssi_dbm, voxel_drone_id, voxel_timestamp_us};
+            held_observation = {x_mm, y_mm, z_mm, rssi_dbm, observation_drone_id, observation_timestamp_us};
             held_axis = {m_axis_tdata, m_axis_tlast};
             if (previous_voxel_stall) voxel_stalls = voxel_stalls + 1;
             if (previous_axis_stall) axis_stalls = axis_stalls + 1;
@@ -123,9 +130,9 @@ module rf_voxel_pipeline_tb;
         fork
             begin
                 // Keep each source word stable until accepted; no extra bubbles.
-                for (int index = 0; index < 32; index++) begin
+                for (int index = 0; index < 56; index++) begin
                     s_axis_tdata = words[index];
-                    s_axis_tlast = (index % 4 == 3);
+                    s_axis_tlast = (index % 7 == 6);
                     s_axis_tvalid = 1'b1;
                     @(posedge aclk);
                     while (s_axis_tready !== 1'b1) @(posedge aclk);
@@ -135,17 +142,17 @@ module rf_voxel_pipeline_tb;
             end
             begin
                 // Fill four voxel stages and the unpacker observation register.
-                // The next packet's X/Y/Z can still prefetch before RSSI blocks.
+                // Six next-packet words prefetch before timestamp high blocks.
                 while (!(voxel_valid && observation_valid && !observation_ready))
                     @(negedge aclk);
-                repeat (12) @(negedge aclk);
-                if (input_count != 23 || forwarded_count != 23 || voxel_count != 0)
+                repeat (20) @(negedge aclk);
+                if (input_count != 41 || forwarded_count != 41 || voxel_count != 0)
                     $fatal(1, "Unexpected progress while all five observation slots were full");
                 // Drain observations while independently stopping AXI forwarding.
                 m_axis_tready = 1'b0;
                 voxel_ready = 1'b1;
                 repeat (5) @(negedge aclk);
-                if (input_count != 23 || voxel_count != 5)
+                if (input_count != 41 || voxel_count != 5)
                     $fatal(1, "AXI stall incorrectly affected observation draining");
                 m_axis_tready = 1'b1;
                 repeat (6) @(negedge aclk);
@@ -155,7 +162,7 @@ module rf_voxel_pipeline_tb;
             end
         join
         repeat (5) @(negedge aclk);
-        if (input_count != 32 || forwarded_count != 32 || voxel_count != 8 ||
+        if (input_count != 56 || forwarded_count != 56 || voxel_count != 8 ||
             voxel_valid !== 1'b0 || observation_valid !== 1'b0)
             $fatal(1, "Lost/duplicate pipeline data: input=%0d forwarded=%0d voxels=%0d",
                    input_count, forwarded_count, voxel_count);

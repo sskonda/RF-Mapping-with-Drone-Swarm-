@@ -17,6 +17,9 @@ module voxel_test_case #(
 );
     logic aresetn = 1'b0;
     logic signed [31:0] x_mm = 0, y_mm = 0, z_mm = 0, rssi_dbm = 0;
+    logic [31:0] observation_drone_id = 0, voxel_drone_id;
+    logic [63:0] observation_timestamp_us = 0, voxel_timestamp_us;
+    logic [95:0] expected_metadata [0:127];
     logic observation_valid = 1'b0, observation_ready;
     logic signed [32:0] vx, vy, vz;
     logic signed [31:0] voxel_rssi_dbm;
@@ -33,7 +36,7 @@ module voxel_test_case #(
     integer accepted_inputs = 0, accepted_outputs = 0;
     integer stall_cycles = 0, simultaneous_transfers = 0;
     logic previous_stall = 1'b0;
-    logic [130:0] held_output;
+    logic [226:0] held_output;
     logic sender_done = 1'b0;
 
     // Independently verify that the reported voxel contains the input position:
@@ -64,18 +67,19 @@ module voxel_test_case #(
         end else begin
             if (previous_stall &&
                 (voxel_valid !== 1'b1 ||
-                 {vx, vy, vz, voxel_rssi_dbm} !== held_output))
+                 {vx, vy, vz, voxel_rssi_dbm, voxel_drone_id, voxel_timestamp_us} !== held_output))
                 $fatal(1, "Case %0d changed a blocked output", CASE_ID);
 
             if (voxel_valid) begin
                 if (read_index >= write_index)
                     $fatal(1, "Case %0d produced an unexpected output", CASE_ID);
-                if ($isunknown({vx, vy, vz, voxel_rssi_dbm}))
+                if ($isunknown({vx, vy, vz, voxel_rssi_dbm, voxel_drone_id, voxel_timestamp_us}))
                     $fatal(1, "Case %0d produced unknown output data", CASE_ID);
                 check_coordinate(vx, expected_x[read_index], X_ORIGIN_MM, "X");
                 check_coordinate(vy, expected_y[read_index], Y_ORIGIN_MM, "Y");
                 check_coordinate(vz, expected_z[read_index], Z_ORIGIN_MM, "Z");
-                if (voxel_rssi_dbm !== expected_rssi[read_index])
+                if (voxel_rssi_dbm !== expected_rssi[read_index] ||
+                    {voxel_drone_id, voxel_timestamp_us} !== expected_metadata[read_index])
                     $fatal(1, "Case %0d changed RSSI or reordered outputs", CASE_ID);
                 if (voxel_ready) begin
                     read_index = read_index + 1;
@@ -94,13 +98,14 @@ module voxel_test_case #(
                 expected_y[write_index] = y_mm;
                 expected_z[write_index] = z_mm;
                 expected_rssi[write_index] = rssi_dbm;
+                expected_metadata[write_index] = {observation_drone_id, observation_timestamp_us};
                 write_index = write_index + 1;
                 accepted_inputs = accepted_inputs + 1;
                 if (voxel_valid && voxel_ready)
                     simultaneous_transfers = simultaneous_transfers + 1;
             end
             previous_stall = voxel_valid && !voxel_ready;
-            held_output = {vx, vy, vz, voxel_rssi_dbm};
+            held_output = {vx, vy, vz, voxel_rssi_dbm, voxel_drone_id, voxel_timestamp_us};
         end
     end
 
@@ -110,6 +115,8 @@ module voxel_test_case #(
     );
         begin
             x_mm = x; y_mm = y; z_mm = z; rssi_dbm = rssi;
+            observation_drone_id = $urandom();
+            observation_timestamp_us = {$urandom(), $urandom()};
             observation_valid = 1'b1;
             @(posedge aclk);
             while (observation_ready !== 1'b1) @(posedge aclk);

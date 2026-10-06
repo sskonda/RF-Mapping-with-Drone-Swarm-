@@ -14,7 +14,7 @@ module accumulator_case #(
 ) (output bit done);
     localparam int SLOT_WIDTH = MAX_VOXELS > 1 ? $clog2(MAX_VOXELS) : 1;
     localparam int SUM_WIDTH = 32 + COUNT_WIDTH;
-    localparam int PAYLOAD_WIDTH = SLOT_WIDTH + SUM_WIDTH + COUNT_WIDTH + 3;
+    localparam int PAYLOAD_WIDTH = SLOT_WIDTH + SUM_WIDTH + COUNT_WIDTH + 3 + 96;
     localparam longint unsigned COUNT_LIMIT = (64'd1 << COUNT_WIDTH) - 1;
 
     bit aclk = 0;
@@ -23,6 +23,8 @@ module accumulator_case #(
     logic [SLOT_WIDTH-1:0] lookup_slot = '0;
     logic signed [31:0] lookup_rssi_dbm = 0;
     logic lookup_new = 0, lookup_rejected = 0, lookup_valid = 0;
+    logic [31:0] lookup_drone_id = 0, acc_drone_id;
+    logic [63:0] lookup_timestamp_us = 0, acc_timestamp_us;
     wire lookup_ready;
     wire [SLOT_WIDTH-1:0] acc_slot;
     wire signed [SUM_WIDTH-1:0] acc_rssi_sum;
@@ -33,6 +35,7 @@ module accumulator_case #(
 
     voxel_accumulator_wrapper #(.MAX_VOXELS(MAX_VOXELS), .COUNT_WIDTH(COUNT_WIDTH)) dut (
         .aclk, .aresetn, .lookup_slot, .lookup_rssi_dbm, .lookup_new,
+        .lookup_drone_id, .lookup_timestamp_us, .acc_drone_id, .acc_timestamp_us,
         .lookup_rejected, .lookup_valid, .lookup_ready, .acc_slot,
         .acc_rssi_sum, .acc_count, .acc_new, .acc_rejected,
         .acc_overflow, .acc_valid, .acc_ready
@@ -43,6 +46,8 @@ module accumulator_case #(
         longint signed sum;
         longint unsigned count;
         bit is_new, rejected, overflow;
+        logic [31:0] drone;
+        logic [63:0] stamp;
     } result_t;
     result_t expected[$], result;
     longint signed sums [MAX_VOXELS];
@@ -50,7 +55,7 @@ module accumulator_case #(
     bit seen [MAX_VOXELS];
     logic [PAYLOAD_WIDTH-1:0] held_payload;
     wire [PAYLOAD_WIDTH-1:0] payload =
-        {acc_slot, acc_rssi_sum, acc_count, acc_new, acc_rejected, acc_overflow};
+        {acc_slot, acc_rssi_sum, acc_count, acc_new, acc_rejected, acc_overflow, acc_drone_id, acc_timestamp_us};
     bit held = 0;
     int accepted = 0, received = 0, aborted = 0, stalled_cycles = 0;
     int rejected_results = 0, overflow_results = 0;
@@ -93,6 +98,8 @@ module accumulator_case #(
                 end
                 result = '0;
                 result.slot = lookup_slot;
+                result.drone = lookup_drone_id;
+                result.stamp = lookup_timestamp_us;
                 result.is_new = lookup_new;
                 result.rejected = lookup_rejected || (int'(lookup_slot) >= MAX_VOXELS);
                 if (!result.rejected) begin
@@ -124,7 +131,8 @@ module accumulator_case #(
                     longint'(acc_rssi_sum) !== result.sum ||
                     64'(acc_count) !== result.count ||
                     acc_new !== result.is_new || acc_rejected !== result.rejected ||
-                    acc_overflow !== result.overflow)
+                    acc_overflow !== result.overflow ||
+                    acc_drone_id !== result.drone || acc_timestamp_us !== result.stamp)
                     $fatal(1, "MAX=%0d COUNT=%0d response %0d mismatch: sum=%0d/%0d count=%0d/%0d",
                            MAX_VOXELS, COUNT_WIDTH, received,
                            acc_rssi_sum, result.sum, acc_count, result.count);
@@ -142,6 +150,8 @@ module accumulator_case #(
         lookup_rssi_dbm = rssi;
         lookup_new = is_new;
         lookup_rejected = rejected;
+        lookup_drone_id = $urandom();
+        lookup_timestamp_us = {$urandom(), $urandom()};
         lookup_valid = 1;
         do @(posedge aclk); while (!lookup_ready);
         @(negedge aclk);

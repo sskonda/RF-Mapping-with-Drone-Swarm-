@@ -1,0 +1,62 @@
+{
+  "parameters": {
+    "rf_packet_unpacker_wrapper": {
+      "DATA_WIDTH": "32"
+    },
+    "voxel_accumulator_wrapper": {
+      "MAX_VOXELS": "1024",
+      "COUNT_WIDTH": "32"
+    },
+    "voxel_dma_readout_wrapper": {
+      "MAX_VOXELS": "1024",
+      "COUNT_WIDTH": "32"
+    },
+    "voxel_lookup_wrapper": {
+      "MAX_VOXELS": "1024",
+      "TABLE_SIZE": "2048"
+    },
+    "voxel_wrapper": {
+      "VOXEL_SIZE_MM": "500",
+      "X_ORIGIN_MM": "0",
+      "Y_ORIGIN_MM": "0",
+      "Z_ORIGIN_MM": "0"
+    },
+    "axi_dma": {
+      "C_INCLUDE_SG": "0",
+      "C_INCLUDE_MM2S_DRE": "0",
+      "C_INCLUDE_S2MM_DRE": "0",
+      "C_M_AXIS_MM2S_TDATA_WIDTH": "32",
+      "C_S_AXIS_S2MM_TDATA_WIDTH": "32"
+    },
+    "processing_system7": {
+      "PCW_CLK0_FREQ": "100000000",
+      "PCW_EN_UART1": "1"
+    }
+  },
+  "sha256": {
+    "FPGA/rtl/axis_passthrough.sv": "5b27bf47a84a5e9a1d710297f7bfe66369711bc3e296001de008f42c7bd16a42",
+    "FPGA/rtl/axis_passthrough_wrapper.v": "3cf5de523ceec5510183afd622ede1890eec09476f0105b528b1f108f5f2b6bf",
+    "FPGA/rtl/rf_packet_unpacker.sv": "39f7e6d9bc7c621240dc36d28be3e6e19e85a572d4b6a754453cb39af731bc17",
+    "FPGA/rtl/rf_packet_unpacker_wrapper.v": "f224a6a10553fe8b2e53997a533db4992cc83807f8eef91f7dc089f0fb1b0308",
+    "FPGA/rtl/voxel.sv": "93319492ced837aff4f6d4e1f2ea67d7339b810a8a063d2f58e21876f4947216",
+    "FPGA/rtl/voxel_accumulator.sv": "c99915bff35610bea0e9287831e6ab65523c6dc793dcee4e3464f67aa27cdd95",
+    "FPGA/rtl/voxel_accumulator_wrapper.v": "3a94fec2296e00c68c3a4da3e258714b5b1166ccbd2504d6ba3eb3fa1d2cb66b",
+    "FPGA/rtl/voxel_dma_readout.sv": "37e81e290f2887088333cf6582de566b5c646cf965476c6c5a8f28bcf64cd2eb",
+    "FPGA/rtl/voxel_dma_readout_wrapper.v": "33bb0a955bc34bcec60c933c72d56d09552f57058c8e0c77fc3ad59c5d111166",
+    "FPGA/rtl/voxel_lookup.sv": "f200a2e6ac613bc0103108cc11ef91c529696a8e51c897fdcc9957f19784333d",
+    "FPGA/rtl/voxel_lookup_wrapper.v": "7fa7fb95a0152cdd162d98b25cc8aab64f8d6c86ab0e0f43f49ef1f9c31c72f6",
+    "FPGA/rtl/voxel_wrapper.v": "f892988b68b6fbfdb551ab139422eb2d6004dffb14f921882d48ed3a6fdb562b",
+    "FPGA/bitstreams/DMA_loopback_hardware_test.xsa": "5e93fa52b9360f62a00e002d2653c526dcfcdb9a42ea4781e5d69a1c846cc9d4",
+    "FPGA/bitstreams/Dynamic_Voxelization.xsa": "cded10cafe4ca62cd681810fa2e9876e78f4b357e46459a5bde79f5638c4834b",
+    "FPGA/bitstreams/FPGA_RF_Voxel.xsa": "b7d7f6a538b94c5d8f5e50e2d6ac706c0f7391afd1909e40f0905898f465b9b2",
+    "FPGA/bitstreams/RF_Mapping_v2_shabbhat.xsa": "25484e4d96a53637b50d0aef93565f261ee9c0b73639f9007143a47f8b65b8e6",
+    "FPGA/bitstreams/RF_Mapping_v3_shalomming.xsa": "6fbb5a55f14fd4342616caee0adf16041041250ce0f09af9b3750be8deac2895",
+    "FPGA/bitstreams/rf_mapping_passthrough.xsa": "1431a952c47ea8466c7bc06593b28f33bfcfa6e4b3663c5bc198cc003984dc73",
+    "FPGA/bitstreams/rf_packet_unpack.xsa": "c1015357a4b2ad998a8b08669b9d49ed02c4d2861c144c2a960084e6f1bb143c",
+    "FPGA/bitstreams/voxel_lookup.xsa": "01e110072ac322307efe0b473ea3abdf4b2bc2e999d8e5aaf595953ead82b8cb",
+    "FPGA/bitstreams/voxel_lookup_const_1.xsa": "47f7382ad9c051876c362f450f22bbee646482dbbeab7a49e9f887738d2586b6",
+    "FPGA/bitstreams/voxel_readout_v1.xsa": "83715cd5972abfba05c69bbc37d18a47813df6f5121d49cf69454c9209f6f384",
+    "FPGA/bitstreams/voxel_readout_with_droneID.xsa": "880b6c59a71bb5c76f6157052a990fb4b088e857dcd44cd84e2700fbd56788ea"
+  },
+  "scope": "HWH parameters verified; payload semantics verified from frozen RTL, not recoverable from HWH alone."
+}

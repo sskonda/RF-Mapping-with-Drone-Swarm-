@@ -3,21 +3,21 @@ Reading pref.tcl
 # 2020.1
 
 # vsim -c -onfinish stop -t 1ps -sv_seed 20260929 -voptargs="+acc" -wlf waves/tb_voxel_lookup.wlf work.tb_voxel_lookup -do "simulate.do" 
-# Start time: 20:05:52 on Sep 29,2026
+# Start time: 01:05:34 on Oct 06,2026
 # Loading sv_std.std
 # Loading work.tb_voxel_lookup
 # Loading work.voxel_lookup_test
 # Loading work.voxel_lookup_wrapper
 # Loading work.voxel_lookup
 # do simulate.do
-# PASS MAX=1 TABLE=2 accepted=1016 received=1015 aborted=1 stalls=383 max_latency=27
-# PASS MAX=5 TABLE=8 accepted=1038 received=1036 aborted=2 stalls=375 max_latency=27
-# PASS MAX=8 TABLE=8 accepted=1053 received=1051 aborted=2 stalls=353 max_latency=27
-# PASS MAX=1024 TABLE=2048 accepted=3109 received=3107 aborted=2 stalls=1070 max_latency=27
+# PASS MAX=1 TABLE=2 accepted=1016 received=1015 aborted=1 stalls=369 max_latency=27
+# PASS MAX=5 TABLE=8 accepted=1038 received=1036 aborted=2 stalls=361 max_latency=27
+# PASS MAX=8 TABLE=8 accepted=1053 received=1051 aborted=2 stalls=381 max_latency=27
+# PASS MAX=1024 TABLE=2048 accepted=3109 received=3107 aborted=2 stalls=1062 max_latency=27
 # PASS: all voxel lookup configurations
-# ** Note: $finish    : ../tb/tb_voxel_lookup.sv(295)
-#    Time: 194390 ns  Iteration: 2  Instance: /tb_voxel_lookup
-# Break in Module tb_voxel_lookup at ../tb/tb_voxel_lookup.sv line 295
-# Stopped at ../tb/tb_voxel_lookup.sv line 295
-# End time: 20:05:53 on Sep 29,2026, Elapsed time: 0:00:01
+# ** Note: $finish    : ../tb/tb_voxel_lookup.sv(303)
+#    Time: 195400 ns  Iteration: 2  Instance: /tb_voxel_lookup
+# Break in Module tb_voxel_lookup at ../tb/tb_voxel_lookup.sv line 303
+# Stopped at ../tb/tb_voxel_lookup.sv line 303
+# End time: 01:05:36 on Oct 06,2026, Elapsed time: 0:00:02
 # Errors: 0, Warnings: 0

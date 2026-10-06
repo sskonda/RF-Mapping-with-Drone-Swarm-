@@ -1,0 +1,29 @@
+Reading pref.tcl
+
+# 2020.1
+
+# vsim -c -onfinish stop -t 1ps -sv_seed 20260929 -voptargs="+acc" -wlf waves/tb_voxel_dma_pipeline.wlf work.tb_voxel_dma_pipeline -do "simulate.do" 
+# Start time: 01:05:28 on Oct 06,2026
+# Loading sv_std.std
+# Loading work.tb_voxel_dma_pipeline
+# Loading work.dma_pipeline_case
+# Loading work.rf_packet_unpacker_wrapper
+# Loading work.rf_packet_unpacker
+# Loading work.voxel_wrapper
+# Loading work.voxel
+# Loading work.voxel_lookup_wrapper
+# Loading work.voxel_lookup
+# Loading work.voxel_accumulator_wrapper
+# Loading work.voxel_accumulator
+# Loading work.voxel_dma_readout_wrapper
+# Loading work.voxel_dma_readout
+# do simulate.do
+# PASS DMA pipeline COUNT=32: packets=1008 full_rejections=196 overflows=0 input_stalls=15133
+# PASS DMA pipeline COUNT=3: packets=1008 full_rejections=196 overflows=776 input_stalls=15133
+# PASS all DMA pipeline configurations
+# ** Note: $finish    : ../tb/tb_voxel_dma_pipeline.sv(285)
+#    Time: 235380 ns  Iteration: 2  Instance: /tb_voxel_dma_pipeline
+# Break in Module tb_voxel_dma_pipeline at ../tb/tb_voxel_dma_pipeline.sv line 285
+# Stopped at ../tb/tb_voxel_dma_pipeline.sv line 285
+# End time: 01:05:29 on Oct 06,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
