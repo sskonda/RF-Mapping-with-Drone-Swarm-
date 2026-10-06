@@ -2,14 +2,14 @@ Reading pref.tcl
 
 # 2020.1
 
-# vsim -c -onfinish stop -t 1ps -sv_seed 20260929 -voptargs="+acc" -wlf waves/voxel_tb.wlf work.voxel_tb -do "simulate.do" 
-# Start time: 01:05:32 on Oct 06,2026
+# vsim -c -onfinish stop -t 1ps -sv_seed 20260929 -voptargs="+acc" -wlf waves/voxel_tb.wlf work.voxel_tb "+VECTORS=/home/sanat/projects/github_RF-Mapping-with-Drone-Swarm/RF-Mapping-with-Drone-Swarm-/FPGA/modelsim/logs/shared.vec" "+SEED=20260929" "+RANDOM_STALLS" -do "simulate_no_waves.do"
+# Start time: 10:55:50 on Oct 06,2026
 # Loading sv_std.std
 # Loading work.voxel_tb
 # Loading work.voxel_test_case
 # Loading work.voxel_wrapper
 # Loading work.voxel
-# do simulate.do
+# do simulate_no_waves.do
 # PASS voxel case 2: 35 accepted outputs; signed coordinates, stalls, reset
 # PASS voxel case 1: 37 accepted outputs; signed coordinates, stalls, reset
 # PASS voxel case 0: 37 accepted outputs; signed coordinates, stalls, reset
@@ -18,5 +18,5 @@ Reading pref.tcl
 #    Time: 950 ns  Iteration: 2  Instance: /voxel_tb
 # Break in Module voxel_tb at ../tb/voxel_tb.sv line 240
 # Stopped at ../tb/voxel_tb.sv line 240
-# End time: 01:05:32 on Oct 06,2026, Elapsed time: 0:00:00
+# End time: 10:55:50 on Oct 06,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0

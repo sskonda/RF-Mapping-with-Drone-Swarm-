@@ -1,0 +1,102 @@
+{
+  "Voxel_Calc_rf_packet_unpacker_w_0": {
+    "aclk": {
+      "CLKFREQUENCY": "100000000",
+      "DIR": "I",
+      "SIGNAME": "processing_system7_0_FCLK_CLK0"
+    },
+    "aresetn": {
+      "DIR": "I",
+      "SIGNAME": "proc_sys_reset_0_peripheral_aresetn"
+    }
+  },
+  "Voxel_Calc_voxel_accumulator_wr_0": {
+    "aclk": {
+      "CLKFREQUENCY": "100000000",
+      "DIR": "I",
+      "SIGNAME": "processing_system7_0_FCLK_CLK0"
+    },
+    "aresetn": {
+      "DIR": "I",
+      "SIGNAME": "proc_sys_reset_0_peripheral_aresetn"
+    }
+  },
+  "Voxel_Calc_voxel_dma_readout_wr_0": {
+    "aclk": {
+      "CLKFREQUENCY": "100000000",
+      "DIR": "I",
+      "SIGNAME": "processing_system7_0_FCLK_CLK0"
+    },
+    "aresetn": {
+      "DIR": "I",
+      "SIGNAME": "proc_sys_reset_0_peripheral_aresetn"
+    }
+  },
+  "Voxel_Calc_voxel_lookup_wrapper_0": {
+    "aclk": {
+      "CLKFREQUENCY": "100000000",
+      "DIR": "I",
+      "SIGNAME": "processing_system7_0_FCLK_CLK0"
+    },
+    "aresetn": {
+      "DIR": "I",
+      "SIGNAME": "proc_sys_reset_0_peripheral_aresetn"
+    },
+    "init_done": {
+      "DIR": "O"
+    },
+    "map_full": {
+      "DIR": "O"
+    },
+    "used_voxels": {
+      "DIR": "O",
+      "LEFT": "10",
+      "RIGHT": "0",
+      "SIGNAME": "Voxel_Calc_voxel_lookup_wrapper_0_used_voxels"
+    }
+  },
+  "Voxel_Calc_voxel_wrapper_0": {
+    "aclk": {
+      "CLKFREQUENCY": "100000000",
+      "DIR": "I",
+      "SIGNAME": "processing_system7_0_FCLK_CLK0"
+    },
+    "aresetn": {
+      "DIR": "I",
+      "SIGNAME": "proc_sys_reset_0_peripheral_aresetn"
+    }
+  },
+  "axi_dma_0": {
+    "axi_resetn": {
+      "DIR": "I",
+      "SIGNAME": "proc_sys_reset_0_peripheral_aresetn"
+    },
+    "m_axi_mm2s_aclk": {
+      "CLKFREQUENCY": "100000000",
+      "DIR": "I",
+      "SIGNAME": "processing_system7_0_FCLK_CLK0"
+    },
+    "m_axi_s2mm_aclk": {
+      "CLKFREQUENCY": "100000000",
+      "DIR": "I",
+      "SIGNAME": "processing_system7_0_FCLK_CLK0"
+    },
+    "mm2s_introut": {
+      "DIR": "O"
+    },
+    "mm2s_prmry_reset_out_n": {
+      "DIR": "O"
+    },
+    "s2mm_introut": {
+      "DIR": "O"
+    },
+    "s2mm_prmry_reset_out_n": {
+      "DIR": "O"
+    },
+    "s_axi_lite_aclk": {
+      "CLKFREQUENCY": "100000000",
+      "DIR": "I",
+      "SIGNAME": "processing_system7_0_FCLK_CLK0"
+    }
+  }
+}

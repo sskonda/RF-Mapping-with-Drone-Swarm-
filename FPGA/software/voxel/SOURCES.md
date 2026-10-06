@@ -27,6 +27,9 @@ were found. Historical screenshot/PASS claims were not used as fresh evidence.
   testbench drive/sample discipline, independent scoreboards, control reset and
   validity-gated payload checks. Stimulus drives falling edges; scoreboards
   inspect rising-edge pre-NBA handshakes. No force initialization hides X values.
+- [pySerial API](https://pyserial.readthedocs.io/en/latest/pyserial_api.html):
+  timeout-zero reads, bounded writes, partial-write accounting and serial connection
+  behavior were checked against the installed 3.5 dependency and mocked transport.
 - [Matplotlib Poly3DCollection](https://matplotlib.org/stable/api/_as_gen/mpl_toolkits.mplot3d.art3d.Poly3DCollection.html):
   collections of planar faces support sparse cubes using the existing plotting
   dependency. Work scales with occupied slots instead of spatial extent.

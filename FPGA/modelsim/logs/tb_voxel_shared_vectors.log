@@ -1,0 +1,26 @@
+Reading pref.tcl
+
+# 2020.1
+
+# vsim -c -onfinish stop -t 1ps -sv_seed 20260929 -voptargs="+acc" -wlf waves/tb_voxel_shared_vectors.wlf work.tb_voxel_shared_vectors "+VECTORS=/home/sanat/projects/github_RF-Mapping-with-Drone-Swarm/RF-Mapping-with-Drone-Swarm-/FPGA/modelsim/logs/shared.vec" "+SEED=20260929" "+RANDOM_STALLS" -do "simulate_no_waves.do"
+# Start time: 10:55:38 on Oct 06,2026
+# Loading sv_std.std
+# Loading work.tb_voxel_shared_vectors
+# Loading work.rf_packet_unpacker_wrapper
+# Loading work.rf_packet_unpacker
+# Loading work.voxel_wrapper
+# Loading work.voxel
+# Loading work.voxel_lookup_wrapper
+# Loading work.voxel_lookup
+# Loading work.voxel_accumulator_wrapper
+# Loading work.voxel_accumulator
+# Loading work.voxel_dma_readout_wrapper
+# Loading work.voxel_dma_readout
+# do simulate_no_waves.do
+# PASS shared vectors seed=20260929 submitted=10001 completed=10000 accepted=6410 rejected=3590 reset_aborted=1 cycles=557962 total_latency=4032390 max_latency=4648 stalls=468353 min_latency=17 measured_cycles=555861 no_stalls=0
+# ** Note: $finish    : ../tb/tb_voxel_shared_vectors.sv(176)
+#    Time: 5579620 ns  Iteration: 1  Instance: /tb_voxel_shared_vectors
+# Break in Module tb_voxel_shared_vectors at ../tb/tb_voxel_shared_vectors.sv line 176
+# Stopped at ../tb/tb_voxel_shared_vectors.sv line 176
+# End time: 10:55:41 on Oct 06,2026, Elapsed time: 0:00:03
+# Errors: 0, Warnings: 0

@@ -1,0 +1,43 @@
+{
+  "commands": [
+    {
+      "command": "python3 -m unittest discover -s Development/Tests/RF_Mapping -v",
+      "result": "72 passed",
+      "duration_seconds": 18.407
+    },
+    {
+      "command": "python3 -m pytest -q",
+      "result": "environment failure before tests: external ROS pytest plugin requires unavailable lark"
+    },
+    {
+      "command": "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest -q",
+      "result": "72 passed; two expected pre-existing metadata warnings",
+      "duration_seconds": 17.29
+    },
+    {
+      "command": "python3 -m compileall -q rf_mapper.py Mapping/RF_Mapping/src Development/Tests",
+      "result": "PASS"
+    },
+    {
+      "command": "python3 -m pip wheel ./Mapping/RF_Mapping --no-deps --wheel-dir /tmp/rf-mapping-wheels",
+      "result": "PASS"
+    }
+  ],
+  "python": "3.14.6 | packaged by Anaconda, Inc. | (main, Jul  9 2026, 14:37:38) [GCC 14.3.0]",
+  "gcc": "gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "simulator": "Model Technology ModelSim - INTEL FPGA STARTER EDITION vsim 2020.1 Simulator 2020.02 Feb 28 2020",
+  "unavailable": [
+    "Vivado",
+    "Vitis",
+    "XSCT",
+    "ARM cross compiler",
+    "board access"
+  ],
+  "license_check": "Fresh ModelSim compile/elaboration/simulation succeeded without license errors. No Vivado/Vitis license usability claim.",
+  "cpu_model": "11th Gen Intel(R) Core(TM) i7-1185G7 @ 3.00GHz",
+  "libraries": {
+    "numpy": "2.4.6",
+    "matplotlib": "3.11.0",
+    "serial": "3.5"
+  }
+}

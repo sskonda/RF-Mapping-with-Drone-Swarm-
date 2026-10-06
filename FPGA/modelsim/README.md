@@ -28,8 +28,11 @@ use this command to recompile instead of the GUI's Compile menu.
 
 The runner compiles all `rtl/*.sv`, `rtl/*.v`, and `tb/*.sv`, creates the project
 if missing, then runs every testbench independently with seed `20260929`. Override
-the seed with `--seed NUMBER`. A result passes only if ModelSim reports no
-errors/fatals, the bench reaches its final PASS marker, and `$finish` is reached.
+the seed with `--seed NUMBER`. The shared-vector bench generates 10,000
+observations by default; `--vectors PATH` supplies an existing shared vector file.
+Use `--only tb_voxel_shared_vectors --no-waves` for stress, and add `--no-stalls`
+for a cycle-throughput measurement. A result passes only if ModelSim reports no
+errors/warnings/fatals, the bench reaches its final PASS marker, and `$finish` is reached.
 This is necessary because ModelSim can return exit code zero after `$fatal`.
 There are both simulation-time watchdogs and a host timeout.
 

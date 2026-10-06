@@ -1,0 +1,211 @@
+{
+  "status": "PASS",
+  "started_utc": "2026-10-06T15:04:13.886969+00:00",
+  "runs": [
+    {
+      "seed": 1,
+      "count": 10000,
+      "vectors_sha256": "7cc30435cfcb533ddaecf753ae220ead2bb186da3cb4bca1c134c0129813c778",
+      "host": {
+        "command": [
+          "/usr/bin/time",
+          "-f",
+          "%e %M",
+          "-o",
+          "/tmp/voxel-final-quick/rss.txt",
+          "/tmp/voxel-final-quick/host_harness",
+          "/tmp/voxel-final-quick/seed1.vec",
+          "/tmp/voxel-final-quick/output.wire",
+          "1"
+        ],
+        "seconds": 0.2427071340061957,
+        "stdout": "",
+        "stderr": "PASS fault, cache order, malformed response, negative floor, saturation, serial/session tests\nPASS seed=1 submitted=10000 completed=10000 accepted=6410 rejected=3590 dropped=0 ticks=334562 memory_bytes=50240",
+        "time_seconds_peak_rss_kib": "0.24 14080"
+      },
+      "integration": {
+        "count": 10000,
+        "accepted": 6410,
+        "rejected": 3590,
+        "dropped": 0,
+        "snapshots": 1024,
+        "parser_errors": 0,
+        "seconds": 0.2976758730073925,
+        "parser_map_sampled_peak_rss_kib": 83768,
+        "parser_warm_rss_kib": 83768,
+        "rss_growth_after_10000_kib": 0,
+        "max_slots": 1024
+      }
+    }
+  ],
+  "mode": "quick",
+  "python": "3.14.6 | packaged by Anaconda, Inc. | (main, Jul  9 2026, 14:37:38) [GCC 14.3.0]",
+  "platform": [
+    "Linux",
+    "KONDA-LT-126-LINUX",
+    "6.8.0-142-generic",
+    "#142-Ubuntu SMP PREEMPT_DYNAMIC Wed Sep  2 14:24:27 UTC 2026",
+    "x86_64"
+  ],
+  "head": "1a5a7eb63827a6a1d187e655cdc0e5b9f02c620c",
+  "sha256": {
+    "FPGA/software/voxel/voxel_core.c": "5d998a730aebe1fcde55148a37cd473b7b5efd9c0567e2d823e39706379c20b2",
+    "FPGA/software/voxel/voxel_wire.c": "3724c83e3658e0feca1a93d4e306140e92fa8bc4a5ff22785506773e014a0f6d",
+    "FPGA/software/voxel/voxel_app.c": "ca95a2ebc7516f62fc270b64c21d63d023ca0365ae40483dabe3dc4d2bf9c49d",
+    "Development/Tests/voxel/host_harness.c": "10d155e27a5a87b188fbe0b1166dff35690bae031d3c234b1c2c48e4458f2f95",
+    "Development/Tests/voxel/run_suite.py": "b7d2d628449bdc7e078b68f93e00d9054f5545ddf93f03a07c0f6a481190f43e",
+    "Development/Tests/voxel/vectors.py": "14b497c3813b49859d522a352013fca9f96e5e05e98aa191b9bfcbd13cdcd6b8",
+    "Development/Tests/voxel/test_bsp.c": "22cdeb6bc3897d4557e10b4148c276b32e9f1cc1e9cdcc867795edeb26239222",
+    "Development/Tests/voxel/board_input.py": "b55218882e8906cae454989c5af17d4fe95ec489cd01c41507f9d501527f0a6e",
+    "Development/Tests/voxel/check_contract.py": "9143624996192f45314a98e626116c4070aacce6e05b2d6ceb6fdef632354820",
+    "Development/Tests/voxel/check_linker_map.py": "9c8075ea377278e6893d9db38f73a231f55351e0521d3b0edff2e00e49f3047f",
+    "Development/Tests/voxel/test_host.py": "5f37c86d4b47e29935ff9280d8bcc3f241f69e118c8f9d80cbaa61ebe327aec0",
+    "Development/Tests/voxel/bsp_mock/vendor_mock.h": "9f5a5fa595dd738b031f7cf2a3f3e3fdffb4ff86dc7c2f97ef6f513f345dfebd",
+    "Development/Tests/voxel/bsp_mock/xaxidma.h": "c46588ea6131e120ace42379abb316aa9644f633c76a790c49e8bc05f6425019",
+    "Development/Tests/voxel/bsp_mock/xil_cache.h": "c46588ea6131e120ace42379abb316aa9644f633c76a790c49e8bc05f6425019",
+    "Development/Tests/voxel/bsp_mock/xparameters.h": "c46588ea6131e120ace42379abb316aa9644f633c76a790c49e8bc05f6425019",
+    "Development/Tests/voxel/bsp_mock/xtime_l.h": "c46588ea6131e120ace42379abb316aa9644f633c76a790c49e8bc05f6425019",
+    "Development/Tests/voxel/bsp_mock/xuartps.h": "c46588ea6131e120ace42379abb316aa9644f633c76a790c49e8bc05f6425019",
+    "Development/Tests/voxel/bsp_mock/xuartps_hw.h": "c46588ea6131e120ace42379abb316aa9644f633c76a790c49e8bc05f6425019",
+    "FPGA/software/voxel/voxel_app.h": "eb26ecce333ad1222c0590d2dbfce7609430282b900ce0d5f2701c5f652df8d6",
+    "FPGA/software/voxel/voxel_core.h": "44b414da77d8c707cfeffb775ef78e0e68d5ac1777e61e9adbba7fb2b5045869",
+    "FPGA/software/voxel/voxel_wire.h": "2fbc456b075ab79cdb7ee36ebba77fec96dc06b8937faba5621ae867942ec248",
+    "FPGA/software/voxel/zybo_main.c": "b1533b8246ad1f27849f3dc27d10338c43088143dc8fcdaa3d0cb282f9e2b5b9",
+    "Mapping/RF_Mapping/src/rf_mapping/voxel/__init__.py": "e241323d0231137f440e7824ca1b0a13d2c98648e033396770f7ecc3b58339e3",
+    "Mapping/RF_Mapping/src/rf_mapping/voxel/bridge.py": "154801afd7a973a18f1967063e73e68592ff91d2eaec9e2fb06ee45714d6a576",
+    "Mapping/RF_Mapping/src/rf_mapping/voxel/cli.py": "39d1d17256f18e0b44b3952b1095434f37800f4617c1588732ef77cb0eabacb9",
+    "Mapping/RF_Mapping/src/rf_mapping/voxel/pose.py": "401b1e1d384d8a81cfa003072940de1b51c93f6a461a79c85314c8f33f322778",
+    "Mapping/RF_Mapping/src/rf_mapping/voxel/transport.py": "75e8a20b5982f1ea2e5020b85a81fea936c822d8d2542a668f18ed2e3a9ce1c7",
+    "Mapping/RF_Mapping/src/rf_mapping/voxel/view.py": "328376cadc129000a1e588b9ca02332719daf6d3f81961e4192c97efac53e129",
+    "Mapping/RF_Mapping/src/rf_mapping/voxel/wire.py": "b0eea3ed5cfcbb01eda915ad5803c35c0f382803991c380afab750a6d1d9e6b3"
+  },
+  "compiler": "gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+  "compile": {
+    "command": [
+      "gcc",
+      "-std=c11",
+      "-O1",
+      "-g",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-Wconversion",
+      "-Wshadow",
+      "-Wpedantic",
+      "-fsanitize=address,undefined",
+      "-fno-sanitize-recover=all",
+      "-fno-omit-frame-pointer",
+      "-I",
+      "/home/sanat/projects/github_RF-Mapping-with-Drone-Swarm/RF-Mapping-with-Drone-Swarm-/FPGA/software/voxel",
+      "/home/sanat/projects/github_RF-Mapping-with-Drone-Swarm/RF-Mapping-with-Drone-Swarm-/FPGA/software/voxel/voxel_core.c",
+      "/home/sanat/projects/github_RF-Mapping-with-Drone-Swarm/RF-Mapping-with-Drone-Swarm-/FPGA/software/voxel/voxel_wire.c",
+      "/home/sanat/projects/github_RF-Mapping-with-Drone-Swarm/RF-Mapping-with-Drone-Swarm-/FPGA/software/voxel/voxel_app.c",
+      "/home/sanat/projects/github_RF-Mapping-with-Drone-Swarm/RF-Mapping-with-Drone-Swarm-/Development/Tests/voxel/host_harness.c",
+      "-o",
+      "/tmp/voxel-final-quick/host_harness"
+    ],
+    "seconds": 0.738456135004526,
+    "stdout": "",
+    "stderr": ""
+  },
+  "bsp_mock": [
+    {
+      "compile": {
+        "command": [
+          "gcc",
+          "-std=c11",
+          "-O1",
+          "-g",
+          "-Wall",
+          "-Wextra",
+          "-Werror",
+          "-Wconversion",
+          "-Wshadow",
+          "-Wpedantic",
+          "-fsanitize=address,undefined",
+          "-fno-sanitize-recover=all",
+          "-fno-omit-frame-pointer",
+          "-I",
+          "/home/sanat/projects/github_RF-Mapping-with-Drone-Swarm/RF-Mapping-with-Drone-Swarm-/FPGA/software/voxel",
+          "/home/sanat/projects/github_RF-Mapping-with-Drone-Swarm/RF-Mapping-with-Drone-Swarm-/FPGA/software/voxel/voxel_core.c",
+          "/home/sanat/projects/github_RF-Mapping-with-Drone-Swarm/RF-Mapping-with-Drone-Swarm-/FPGA/software/voxel/voxel_wire.c",
+          "/home/sanat/projects/github_RF-Mapping-with-Drone-Swarm/RF-Mapping-with-Drone-Swarm-/FPGA/software/voxel/voxel_app.c",
+          "/home/sanat/projects/github_RF-Mapping-with-Drone-Swarm/RF-Mapping-with-Drone-Swarm-/Development/Tests/voxel/test_bsp.c",
+          "-I",
+          "/home/sanat/projects/github_RF-Mapping-with-Drone-Swarm/RF-Mapping-with-Drone-Swarm-/Development/Tests/voxel/bsp_mock",
+          "-o",
+          "/tmp/voxel-final-quick/test_bsp"
+        ],
+        "seconds": 0.6129648179921787,
+        "stdout": "",
+        "stderr": ""
+      },
+      "test": {
+        "command": [
+          "/tmp/voxel-final-quick/test_bsp"
+        ],
+        "seconds": 0.009355119997053407,
+        "stdout": "PASS actual BSP adapter with mocked vendor calls (not vendor compilation)",
+        "stderr": ""
+      }
+    },
+    {
+      "compile": {
+        "command": [
+          "gcc",
+          "-std=c11",
+          "-O1",
+          "-g",
+          "-Wall",
+          "-Wextra",
+          "-Werror",
+          "-Wconversion",
+          "-Wshadow",
+          "-Wpedantic",
+          "-fsanitize=address,undefined",
+          "-fno-sanitize-recover=all",
+          "-fno-omit-frame-pointer",
+          "-I",
+          "/home/sanat/projects/github_RF-Mapping-with-Drone-Swarm/RF-Mapping-with-Drone-Swarm-/FPGA/software/voxel",
+          "/home/sanat/projects/github_RF-Mapping-with-Drone-Swarm/RF-Mapping-with-Drone-Swarm-/FPGA/software/voxel/voxel_core.c",
+          "/home/sanat/projects/github_RF-Mapping-with-Drone-Swarm/RF-Mapping-with-Drone-Swarm-/FPGA/software/voxel/voxel_wire.c",
+          "/home/sanat/projects/github_RF-Mapping-with-Drone-Swarm/RF-Mapping-with-Drone-Swarm-/FPGA/software/voxel/voxel_app.c",
+          "/home/sanat/projects/github_RF-Mapping-with-Drone-Swarm/RF-Mapping-with-Drone-Swarm-/Development/Tests/voxel/test_bsp.c",
+          "-I",
+          "/home/sanat/projects/github_RF-Mapping-with-Drone-Swarm/RF-Mapping-with-Drone-Swarm-/Development/Tests/voxel/bsp_mock",
+          "-DSDT",
+          "-o",
+          "/tmp/voxel-final-quick/test_bsp_sdt"
+        ],
+        "seconds": 0.6005638729984639,
+        "stdout": "",
+        "stderr": ""
+      },
+      "test": {
+        "command": [
+          "/tmp/voxel-final-quick/test_bsp_sdt"
+        ],
+        "seconds": 0.009249205992091447,
+        "stdout": "PASS actual BSP adapter with mocked vendor calls (not vendor compilation)",
+        "stderr": ""
+      }
+    }
+  ],
+  "python_tests": {
+    "command": [
+      "/home/sanat/anaconda3/bin/python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "Development/Tests/voxel",
+      "-p",
+      "test_host.py",
+      "-v"
+    ],
+    "seconds": 1.0426017560093896,
+    "stdout": "",
+    "stderr": "test_alignment_rejects_float_timestamps (test_host.HostTests.test_alignment_rejects_float_timestamps) ... ok\ntest_explicit_legacy_trigger_annotations (test_host.HostTests.test_explicit_legacy_trigger_annotations) ... ok\ntest_live_admission_drop_accounting (test_host.HostTests.test_live_admission_drop_accounting) ... ok\ntest_live_esp_trigger_fragmentation (test_host.HostTests.test_live_esp_trigger_fragmentation) ... ok\ntest_live_lost_response_stops_without_retry (test_host.HostTests.test_live_lost_response_stops_without_retry) ... ok\ntest_live_missing_start_stops_without_retry (test_host.HostTests.test_live_missing_start_stops_without_retry) ... ok\ntest_live_partial_serial_and_replay (test_host.HostTests.test_live_partial_serial_and_replay) ... ok\ntest_pose_precision_wrap_reboot_and_expiry (test_host.HostTests.test_pose_precision_wrap_reboot_and_expiry) ... ok\ntest_sparse_extremes_fractional_export_and_render (test_host.HostTests.test_sparse_extremes_fractional_export_and_render) ... ok\ntest_wire_fragmentation_corruption_bounds (test_host.HostTests.test_wire_fragmentation_corruption_bounds) ... ok\ntest_ddr_placement_guard (test_host.LinkerMapTests.test_ddr_placement_guard) ... ok\n\n----------------------------------------------------------------------\nRan 11 tests in 0.528s\n\nOK"
+  },
+  "finished_utc": "2026-10-06T15:04:17.516902+00:00"
+}

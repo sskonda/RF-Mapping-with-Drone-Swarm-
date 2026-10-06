@@ -2,13 +2,13 @@ Reading pref.tcl
 
 # 2020.1
 
-# vsim -c -onfinish stop -t 1ps -sv_seed 20260929 -voptargs="+acc" -wlf waves/tb_voxel_dma_readout.wlf work.tb_voxel_dma_readout -do "simulate.do" 
-# Start time: 01:05:26 on Oct 06,2026
+# vsim -c -onfinish stop -t 1ps -sv_seed 20260929 -voptargs="+acc" -wlf waves/tb_voxel_dma_readout.wlf work.tb_voxel_dma_readout "+VECTORS=/home/sanat/projects/github_RF-Mapping-with-Drone-Swarm/RF-Mapping-with-Drone-Swarm-/FPGA/modelsim/logs/shared.vec" "+SEED=20260929" "+RANDOM_STALLS" -do "simulate_no_waves.do"
+# Start time: 10:55:42 on Oct 06,2026
 # Loading sv_std.std
 # Loading work.tb_voxel_dma_readout
 # Loading work.readout_case
 # Loading work.voxel_dma_readout
-# do simulate.do
+# do simulate_no_waves.do
 # PASS readout MAX=1024 COUNT=32: packets=334 reset_aborts=8 stalls=856
 # PASS readout MAX=5 COUNT=3: packets=334 reset_aborts=8 stalls=856
 # PASS readout MAX=1 COUNT=1: packets=334 reset_aborts=8 stalls=856
@@ -17,5 +17,5 @@ Reading pref.tcl
 #    Time: 36660 ns  Iteration: 2  Instance: /tb_voxel_dma_readout
 # Break in Module tb_voxel_dma_readout at ../tb/tb_voxel_dma_readout.sv line 196
 # Stopped at ../tb/tb_voxel_dma_readout.sv line 196
-# End time: 01:05:27 on Oct 06,2026, Elapsed time: 0:00:01
+# End time: 10:55:43 on Oct 06,2026, Elapsed time: 0:00:01
 # Errors: 0, Warnings: 0

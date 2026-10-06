@@ -1,11 +1,22 @@
 {
-  "started_utc": "2026-10-06T05:05:26.150125+00:00",
+  "started_utc": "2026-10-06T14:55:36.755316+00:00",
   "seed": 20260929,
   "status": "PASS",
   "tests": [
     {
+      "top": "tb_voxel_shared_vectors",
+      "status": "PASS",
+      "duration_seconds": 4.783154749995447,
+      "details": [
+        "PASS shared vectors seed=20260929 submitted=10001 completed=10000 accepted=6410 rejected=3590 reset_aborted=1 cycles=557962 total_latency=4032390 max_latency=4648 stalls=468353 min_latency=17 measured_cycles=555861 no_stalls=0"
+      ],
+      "log": "logs/tb_voxel_shared_vectors.log",
+      "waveform": "waves/tb_voxel_shared_vectors.wlf"
+    },
+    {
       "top": "tb_voxel_dma_readout",
       "status": "PASS",
+      "duration_seconds": 1.8160593809880083,
       "details": [
         "PASS readout MAX=1024 COUNT=32: packets=334 reset_aborts=8 stalls=856",
         "PASS readout MAX=5 COUNT=3: packets=334 reset_aborts=8 stalls=856",
@@ -18,6 +29,7 @@
     {
       "top": "tb_voxel_dma_pipeline",
       "status": "PASS",
+      "duration_seconds": 2.067691037998884,
       "details": [
         "PASS DMA pipeline COUNT=32: packets=1008 full_rejections=196 overflows=0 input_stalls=15133",
         "PASS DMA pipeline COUNT=3: packets=1008 full_rejections=196 overflows=776 input_stalls=15133",
@@ -29,6 +41,7 @@
     {
       "top": "axis_passthrough_tb",
       "status": "PASS",
+      "duration_seconds": 1.786928560002707,
       "details": [
         "PASS axis width 64: in=82 out=81 aborted=1 stalls=36 overlap=37",
         "PASS axis width 32: in=82 out=81 aborted=1 stalls=36 overlap=37",
@@ -41,6 +54,7 @@
     {
       "top": "rf_packet_unpacker_tb",
       "status": "PASS",
+      "duration_seconds": 1.8375521179987118,
       "details": [
         "PASS: 11 observations accepted, 107 AXI words forwarded; reset drops pending data"
       ],
@@ -50,6 +64,7 @@
     {
       "top": "voxel_tb",
       "status": "PASS",
+      "duration_seconds": 1.8669991200004006,
       "details": [
         "PASS voxel case 2: 35 accepted outputs; signed coordinates, stalls, reset",
         "PASS voxel case 1: 37 accepted outputs; signed coordinates, stalls, reset",
@@ -62,6 +77,7 @@
     {
       "top": "rf_voxel_pipeline_tb",
       "status": "PASS",
+      "duration_seconds": 1.9639427079964662,
       "details": [
         "PASS: unpacker -> voxel: 8 observations, 56 AXI words; both sinks stalled"
       ],
@@ -71,6 +87,7 @@
     {
       "top": "tb_voxel_lookup",
       "status": "PASS",
+      "duration_seconds": 2.433794216005481,
       "details": [
         "PASS MAX=1 TABLE=2 accepted=1016 received=1015 aborted=1 stalls=369 max_latency=27",
         "PASS MAX=5 TABLE=8 accepted=1038 received=1036 aborted=2 stalls=361 max_latency=27",
@@ -84,6 +101,7 @@
     {
       "top": "tb_voxel_accumulator",
       "status": "PASS",
+      "duration_seconds": 1.9654051339894067,
       "details": [
         "PASS MAX=1 COUNT=3: received=1543 aborted=2 rejected=1512 overflow=1421 stalled=525",
         "PASS MAX=5 COUNT=3: received=1547 aborted=2 rejected=1488 overflow=1397 stalled=525",
@@ -96,6 +114,7 @@
     {
       "top": "tb_voxel_accumulator_pipeline",
       "status": "PASS",
+      "duration_seconds": 1.9137220999982674,
       "details": [
         "PASS pipeline: 2008 observations/results, 396 rejected, 2907 upstream stall cycles"
       ],
@@ -104,6 +123,15 @@
     }
   ],
   "simulator": "Model Technology ModelSim - INTEL FPGA STARTER EDITION vsim 2020.1 Simulator 2020.02 Feb 28 2020",
+  "command": [
+    "FPGA/modelsim/run_regression.py",
+    "--native-runtime",
+    "/home/sanat/intelFPGA/20.1",
+    "--no-waves"
+  ],
+  "runner_sha256": "234d454dd460945c89ce6997eacbd1243bfd25aa7a08a15e23e1667a86a6cb81",
+  "head": "4f9ecd8c39644aad1f5178cda7caa55665945960",
+  "vectors_sha256": "e8aa48f22a67a070b4c6fdc2d011d49cb0da83c250bbe0618a51605e63c94742",
   "sources": [
     "../rtl/axis_passthrough.sv",
     "../rtl/rf_packet_unpacker.sv",
@@ -125,6 +153,7 @@
     "../tb/tb_voxel_dma_pipeline.sv",
     "../tb/tb_voxel_dma_readout.sv",
     "../tb/tb_voxel_lookup.sv",
+    "../tb/tb_voxel_shared_vectors.sv",
     "../tb/voxel_tb.sv"
   ],
   "sha256": {
@@ -148,8 +177,9 @@
     "../tb/tb_voxel_dma_pipeline.sv": "736b8f25751aef7ab3e678b3da009746f2541e0fc83dcf133c371fa61ecca436",
     "../tb/tb_voxel_dma_readout.sv": "421fa399130650277240e3fc76138ddaf2a71d957d3177db43a3435e6a28be0e",
     "../tb/tb_voxel_lookup.sv": "1795b015f70f50a1b173dd95d6590f2d0cd297c8e75b958b97634259cf36d6bc",
+    "../tb/tb_voxel_shared_vectors.sv": "24da216fea7b6391e08560bdd74ffd2b2402074eab539794a7d5110326f1e10e",
     "../tb/voxel_tb.sv": "ce07639920e96e24478dd227847524d5f935fe910d9f020e51623f9b31b1917c"
   },
-  "duration_seconds": 13.17478817400115,
-  "finished_utc": "2026-10-06T05:05:39.414916+00:00"
+  "duration_seconds": 22.546802286000457,
+  "finished_utc": "2026-10-06T14:55:59.470826+00:00"
 }

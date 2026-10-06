@@ -2,19 +2,19 @@ Reading pref.tcl
 
 # 2020.1
 
-# vsim -c -onfinish stop -t 1ps -sv_seed 20260929 -voptargs="+acc" -wlf waves/rf_voxel_pipeline_tb.wlf work.rf_voxel_pipeline_tb -do "simulate.do" 
-# Start time: 01:05:33 on Oct 06,2026
+# vsim -c -onfinish stop -t 1ps -sv_seed 20260929 -voptargs="+acc" -wlf waves/rf_voxel_pipeline_tb.wlf work.rf_voxel_pipeline_tb "+VECTORS=/home/sanat/projects/github_RF-Mapping-with-Drone-Swarm/RF-Mapping-with-Drone-Swarm-/FPGA/modelsim/logs/shared.vec" "+SEED=20260929" "+RANDOM_STALLS" -do "simulate_no_waves.do"
+# Start time: 10:55:52 on Oct 06,2026
 # Loading sv_std.std
 # Loading work.rf_voxel_pipeline_tb
 # Loading work.rf_packet_unpacker_wrapper
 # Loading work.rf_packet_unpacker
 # Loading work.voxel_wrapper
 # Loading work.voxel
-# do simulate.do
+# do simulate_no_waves.do
 # PASS: unpacker -> voxel: 8 observations, 56 AXI words; both sinks stalled
 # ** Note: $finish    : ../tb/rf_voxel_pipeline_tb.sv(174)
 #    Time: 880 ns  Iteration: 1  Instance: /rf_voxel_pipeline_tb
 # Break in Module rf_voxel_pipeline_tb at ../tb/rf_voxel_pipeline_tb.sv line 174
 # Stopped at ../tb/rf_voxel_pipeline_tb.sv line 174
-# End time: 01:05:33 on Oct 06,2026, Elapsed time: 0:00:00
+# End time: 10:55:52 on Oct 06,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0

@@ -2,17 +2,17 @@ Reading pref.tcl
 
 # 2020.1
 
-# vsim -c -onfinish stop -t 1ps -sv_seed 20260929 -voptargs="+acc" -wlf waves/rf_packet_unpacker_tb.wlf work.rf_packet_unpacker_tb -do "simulate.do" 
-# Start time: 01:05:31 on Oct 06,2026
+# vsim -c -onfinish stop -t 1ps -sv_seed 20260929 -voptargs="+acc" -wlf waves/rf_packet_unpacker_tb.wlf work.rf_packet_unpacker_tb "+VECTORS=/home/sanat/projects/github_RF-Mapping-with-Drone-Swarm/RF-Mapping-with-Drone-Swarm-/FPGA/modelsim/logs/shared.vec" "+SEED=20260929" "+RANDOM_STALLS" -do "simulate_no_waves.do"
+# Start time: 10:55:48 on Oct 06,2026
 # Loading sv_std.std
 # Loading work.rf_packet_unpacker_tb
 # Loading work.rf_packet_unpacker_wrapper
 # Loading work.rf_packet_unpacker
-# do simulate.do
+# do simulate_no_waves.do
 # PASS: 11 observations accepted, 107 AXI words forwarded; reset drops pending data
 # ** Note: $finish    : ../tb/rf_packet_unpacker_tb.sv(306)
 #    Time: 1480 ns  Iteration: 1  Instance: /rf_packet_unpacker_tb
 # Break in Module rf_packet_unpacker_tb at ../tb/rf_packet_unpacker_tb.sv line 306
 # Stopped at ../tb/rf_packet_unpacker_tb.sv line 306
-# End time: 01:05:31 on Oct 06,2026, Elapsed time: 0:00:00
+# End time: 10:55:49 on Oct 06,2026, Elapsed time: 0:00:01
 # Errors: 0, Warnings: 0

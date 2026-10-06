@@ -1,6 +1,6 @@
 Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-Start time: 01:05:26 on Oct 06,2026
-vlog -sv -work work ../rtl/axis_passthrough.sv ../rtl/rf_packet_unpacker.sv ../rtl/voxel.sv ../rtl/voxel_accumulator.sv ../rtl/voxel_dma_readout.sv ../rtl/voxel_lookup.sv ../rtl/axis_passthrough_wrapper.v ../rtl/rf_packet_unpacker_wrapper.v ../rtl/voxel_accumulator_wrapper.v ../rtl/voxel_dma_readout_wrapper.v ../rtl/voxel_lookup_wrapper.v ../rtl/voxel_wrapper.v ../tb/axis_passthrough_tb.sv ../tb/rf_packet_unpacker_tb.sv ../tb/rf_voxel_pipeline_tb.sv ../tb/tb_voxel_accumulator.sv ../tb/tb_voxel_accumulator_pipeline.sv ../tb/tb_voxel_dma_pipeline.sv ../tb/tb_voxel_dma_readout.sv ../tb/tb_voxel_lookup.sv ../tb/voxel_tb.sv 
+Start time: 10:55:36 on Oct 06,2026
+vlog -sv -work work ../rtl/axis_passthrough.sv ../rtl/rf_packet_unpacker.sv ../rtl/voxel.sv ../rtl/voxel_accumulator.sv ../rtl/voxel_dma_readout.sv ../rtl/voxel_lookup.sv ../rtl/axis_passthrough_wrapper.v ../rtl/rf_packet_unpacker_wrapper.v ../rtl/voxel_accumulator_wrapper.v ../rtl/voxel_dma_readout_wrapper.v ../rtl/voxel_lookup_wrapper.v ../rtl/voxel_wrapper.v ../tb/axis_passthrough_tb.sv ../tb/rf_packet_unpacker_tb.sv ../tb/rf_voxel_pipeline_tb.sv ../tb/tb_voxel_accumulator.sv ../tb/tb_voxel_accumulator_pipeline.sv ../tb/tb_voxel_dma_pipeline.sv ../tb/tb_voxel_dma_readout.sv ../tb/tb_voxel_lookup.sv ../tb/tb_voxel_shared_vectors.sv ../tb/voxel_tb.sv
 -- Compiling module axis_passthrough
 -- Compiling module rf_packet_unpacker
 -- Compiling module voxel
@@ -26,6 +26,7 @@ vlog -sv -work work ../rtl/axis_passthrough.sv ../rtl/rf_packet_unpacker.sv ../r
 -- Compiling module tb_voxel_dma_readout
 -- Compiling module voxel_lookup_test
 -- Compiling module tb_voxel_lookup
+-- Compiling module tb_voxel_shared_vectors
 -- Compiling module voxel_test_case
 -- Compiling module voxel_tb
 
@@ -38,6 +39,7 @@ Top level modules:
 	tb_voxel_dma_pipeline
 	tb_voxel_dma_readout
 	tb_voxel_lookup
+	tb_voxel_shared_vectors
 	voxel_tb
-End time: 01:05:26 on Oct 06,2026, Elapsed time: 0:00:00
+End time: 10:55:37 on Oct 06,2026, Elapsed time: 0:00:01
 Errors: 0, Warnings: 0

@@ -2,14 +2,14 @@ Reading pref.tcl
 
 # 2020.1
 
-# vsim -c -onfinish stop -t 1ps -sv_seed 20260929 -voptargs="+acc" -wlf waves/axis_passthrough_tb.wlf work.axis_passthrough_tb -do "simulate.do" 
-# Start time: 01:05:29 on Oct 06,2026
+# vsim -c -onfinish stop -t 1ps -sv_seed 20260929 -voptargs="+acc" -wlf waves/axis_passthrough_tb.wlf work.axis_passthrough_tb "+VECTORS=/home/sanat/projects/github_RF-Mapping-with-Drone-Swarm/RF-Mapping-with-Drone-Swarm-/FPGA/modelsim/logs/shared.vec" "+SEED=20260929" "+RANDOM_STALLS" -do "simulate_no_waves.do"
+# Start time: 10:55:46 on Oct 06,2026
 # Loading sv_std.std
 # Loading work.axis_passthrough_tb
 # Loading work.axis_passthrough_test_case
 # Loading work.axis_passthrough_wrapper
 # Loading work.axis_passthrough
-# do simulate.do
+# do simulate_no_waves.do
 # PASS axis width 64: in=82 out=81 aborted=1 stalls=36 overlap=37
 # PASS axis width 32: in=82 out=81 aborted=1 stalls=36 overlap=37
 # PASS axis width 8: in=82 out=81 aborted=1 stalls=36 overlap=37
@@ -18,5 +18,5 @@ Reading pref.tcl
 #    Time: 1900 ns  Iteration: 2  Instance: /axis_passthrough_tb
 # Break in Module axis_passthrough_tb at ../tb/axis_passthrough_tb.sv line 179
 # Stopped at ../tb/axis_passthrough_tb.sv line 179
-# End time: 01:05:30 on Oct 06,2026, Elapsed time: 0:00:01
+# End time: 10:55:47 on Oct 06,2026, Elapsed time: 0:00:01
 # Errors: 0, Warnings: 0

@@ -1,2 +1,23 @@
-# do logs/gui_validate_project.do
-# Loading project rf_mapping
+PASS current ModelSim project inventory: 22 existing relative sources (6 RTL modules, 6 wrappers, 10 benches).
+../rtl/axis_passthrough.sv
+../rtl/axis_passthrough_wrapper.v
+../rtl/rf_packet_unpacker.sv
+../rtl/rf_packet_unpacker_wrapper.v
+../rtl/voxel.sv
+../rtl/voxel_accumulator.sv
+../rtl/voxel_accumulator_wrapper.v
+../rtl/voxel_dma_readout.sv
+../rtl/voxel_dma_readout_wrapper.v
+../rtl/voxel_lookup.sv
+../rtl/voxel_lookup_wrapper.v
+../rtl/voxel_wrapper.v
+../tb/axis_passthrough_tb.sv
+../tb/rf_packet_unpacker_tb.sv
+../tb/rf_voxel_pipeline_tb.sv
+../tb/tb_voxel_accumulator.sv
+../tb/tb_voxel_accumulator_pipeline.sv
+../tb/tb_voxel_dma_pipeline.sv
+../tb/tb_voxel_dma_readout.sv
+../tb/tb_voxel_lookup.sv
+../tb/tb_voxel_shared_vectors.sv
+../tb/voxel_tb.sv
