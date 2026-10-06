@@ -7,7 +7,6 @@ import json
 import os
 from pathlib import Path
 import re
-import resource
 import subprocess
 import sys
 import time
@@ -34,12 +33,18 @@ def run(command, cwd=ROOT, timeout=180):
     return {'command': list(map(str, command)), 'seconds': time.monotonic() - started,
             'stdout': result.stdout.strip(), 'stderr': result.stderr.strip()}
 
+def resident_kib():
+    # Sample live RSS: import-time high-water marks can conceal later growth.
+    fields = Path('/proc/self/statm').read_text().split()
+    return int(fields[1]) * os.sysconf('SC_PAGE_SIZE') // 1024
+
 def check_wire(path, seed, count):
     parser, sparse = wire.Parser(), SparseMap()
     golden = iter(rows(seed, count))
     received = accepted = rejected = snapshots = ends = diagnostics = 0
     started = time.monotonic()
     baseline_rss = None
+    sampled_peak_rss = resident_kib()
     with path.open('rb') as source:
         while chunk := source.read(8192):
             for message in parser.feed(chunk):
@@ -58,8 +63,10 @@ def check_wire(path, seed, count):
                         accepted += 1
                         assert record['mean_dbm'] == total / row[10]
                     sparse.apply(record)
-                    if received == 10000:
-                        baseline_rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+                    if received % 10000 == 0:
+                        current_rss = resident_kib()
+                        if baseline_rss is None: baseline_rss = current_rss
+                        sampled_peak_rss = max(sampled_peak_rss, current_rss)
                 elif message.kind == wire.SNAPSHOT_SLOT:
                     record = wire.update_record(message)
                     previous = sparse.slots[record['slot']]
@@ -77,12 +84,12 @@ def check_wire(path, seed, count):
     assert received == count and accepted + rejected == count
     assert next(golden, None) is None and parser.errors == 0
     assert snapshots == 1024 and ends == 1 and diagnostics == 1
-    rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    rss = max(sampled_peak_rss, resident_kib())
     if baseline_rss is not None:
         assert rss - baseline_rss < 16384, (baseline_rss, rss)
     return {'count': received, 'accepted': accepted, 'rejected': rejected, 'dropped': 0,
             'snapshots': snapshots, 'parser_errors': parser.errors, 'seconds': time.monotonic() - started,
-            'parser_map_peak_rss_kib': rss, 'rss_growth_after_10000_kib': None if baseline_rss is None else rss - baseline_rss,
+            'parser_map_sampled_peak_rss_kib': rss, 'parser_warm_rss_kib': baseline_rss, 'rss_growth_after_10000_kib': None if baseline_rss is None else rss - baseline_rss,
             'max_slots': len(sparse.slots)}
 
 def main():

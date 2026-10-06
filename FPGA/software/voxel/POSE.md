@@ -50,7 +50,10 @@ startup status is treated as a hard stop by the live bridge; missed startup on
 reconnect must be handled by the operator/pose producer. Do not reuse alignment
 across serial reconnects or infer a boot epoch from a small timestamp alone.
 Opening the ESP serial port may assert DTR and reboot it; calibrate and manage
-that reset before a live run. The bridge sends no MEASURE commands automatically.
+that reset before a live run. With `--annotation-cm X Y`, the bridge sends PING and then one MEASURE command
+after each READY, continuously acquiring the sketch's 50-sample bursts. These
+explicit manual centimetre annotations are logged and never used as measured
+pose. Without that option the bridge only listens to externally triggered data.
 
 Deterministic replay consumes ordered event JSONL (pose events plus
 `{"type":"rssi","boot_id":"...","line":"DATA,..."}`). The included fixture is
@@ -60,11 +63,11 @@ Live example, after calibration and coordinated Zybo restart:
 
 ```sh
 rf-voxel bridge-live --config measured-alignment.json \
-  --esp-port /dev/ttyUSB0 --pose-port /dev/ttyACM0 --zybo-port /dev/ttyUSB1 \
+  --esp-port /dev/ttyUSB0 --annotation-cm 12 34 --pose-port /dev/ttyACM0 --zybo-port /dev/ttyUSB1 \
   --raw-log raw-events.jsonl --wire-log voxel-results.wire --fresh-map
 ```
 
 Physical integration still needs measured 3D pose hardware and its schema
 producer, surveyed frame transforms, clock calibration and boot detection, an
-explicit per-drone identity assignment, ESP measurement triggering, and verified
+explicit per-drone identity assignment, verified ESP connection/reset behavior, and verified
 Zybo UART wiring/port selection. None is fabricated by deterministic replay.

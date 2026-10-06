@@ -2,12 +2,11 @@
 import argparse
 import json
 from pathlib import Path
-import sys
 import time
 
 from . import wire
 from .transport import live
-from .pose import Alignment, PoseAdapter
+from .bridge import adapter_from_config, joined_events, serial_events
 from .view import SparseMap, draw
 
 
@@ -45,65 +44,6 @@ def replay(path, image=None, follow=False):
     return {'occupied': len(sparse.slots), 'framing_errors': parser.errors}
 
 
-def adapter_from_config(path):
-    config = json.loads(Path(path).read_text())
-    adapter = PoseAdapter(config['drone_id'], config['frame'], Alignment(**config['alignment']), config['max_pose_age_us'])
-    return config, adapter
-
-
-def joined_events(events, adapter, raw_log):
-    for event in events:
-        raw_log.write(json.dumps(event, separators=(',', ':')) + '\n')
-        raw_log.flush()
-        try:
-            if event['type'] == 'pose':
-                adapter.pose(event)
-            elif event['type'] == 'rssi':
-                yield adapter.measurement(event['line'], event['boot_id'])
-            elif event['type'] == 'reboot':
-                raise RuntimeError('Source reboot: stop and recalibrate clock alignment')
-            else:
-                raise ValueError('unknown event type')
-        except (ValueError, KeyError) as error:
-            print(f'pose/input rejected: {error}', file=sys.stderr)
-
-
-def serial_events(esp_port, pose_port, boot_id):
-    import serial
-    # Pose producer sends the documented measured-pose JSON schema on its own port.
-    with serial.Serial(esp_port, 115200, timeout=0) as esp, serial.Serial(pose_port, 115200, timeout=0) as poses:
-        buffers = [bytearray(), bytearray()]
-        discards = [False, False]
-        while True:
-            for index, port in enumerate((esp, poses)):
-                for byte in port.read(256):
-                    if byte == 10:
-                        line = buffers[index].decode('utf8', errors='replace').strip()
-                        buffers[index].clear()
-                        if discards[index]:
-                            discards[index] = False
-                            print('oversized source line dropped', file=sys.stderr)
-                            continue
-                        if index == 0:
-                            if line.startswith('STATUS,FIRMWARE,'):
-                                yield {'type': 'reboot'}
-                            elif line.startswith('DATA,'):
-                                yield {'type': 'rssi', 'line': line, 'boot_id': boot_id}
-                        elif line:
-                            try:
-                                yield json.loads(line)
-                            except json.JSONDecodeError:
-                                print('invalid pose JSON dropped', file=sys.stderr)
-                    elif not discards[index]:
-                        if len(buffers[index]) == 1024:
-                            discards[index] = True
-                            buffers[index].clear()
-                        else:
-                            buffers[index].append(byte)
-            time.sleep(0.001)
-
-
-
 def export_json(path, output):
     parser = wire.Parser()
     sparse = SparseMap()
@@ -137,6 +77,7 @@ def main(argv=None):
             command.add_argument('--output', required=True)
         else:
             command.add_argument('--esp-port', required=True)
+            command.add_argument('--annotation-cm', nargs=2, type=int, metavar=('X', 'Y'), help='manual legacy annotations; continuously trigger MEASURE after READY; never used as measured pose')
             command.add_argument('--pose-port', required=True)
             command.add_argument('--zybo-port', required=True)
             command.add_argument('--wire-log', required=True)
@@ -163,7 +104,7 @@ def main(argv=None):
                     for observation in joined_events((json.loads(line) for line in source), adapter, raw):
                         output.write(json.dumps(observation) + '\n')
             else:
-                events = serial_events(args.esp_port, args.pose_port, config['alignment']['boot_id'])
+                events = serial_events(args.esp_port, args.pose_port, config['alignment']['boot_id'], args.annotation_cm)
                 live(args.zybo_port, joined_events(events, adapter, raw), args.wire_log, args.fresh_map)
 
 if __name__ == '__main__':

@@ -11,6 +11,7 @@ from unittest.mock import patch
 os.environ.setdefault('MPLBACKEND', 'Agg')
 from rf_mapping.voxel import wire
 from rf_mapping.voxel.cli import live, replay
+from rf_mapping.voxel.bridge import measurement_command, serial_events
 from rf_mapping.voxel.pose import Alignment, PoseAdapter
 from rf_mapping.voxel.view import SparseMap
 
@@ -71,6 +72,39 @@ class HostTests(unittest.TestCase):
         return PoseAdapter(202,'lab_enu',Alignment('boot-A',anchor,common,1,1,20),1500)
     def pose(self, adapter, time, xyz=(-1,500,1000)):
         adapter.pose(dict(drone_id=202,frame='lab_enu',units='mm',clock='aligned_common_us',boot_id='boot-A',position=xyz,timestamp_us=time))
+    def test_live_esp_trigger_fragmentation(self):
+        class Port:
+            def __init__(self, name, *args, **kwargs):
+                self.esp = name == 'esp'
+                self.rx = bytearray(b'READY\n' if self.esp else b'')
+                self.tx = bytearray()
+                self.samples = 0
+            def __enter__(self): return self
+            def __exit__(self, *args): pass
+            def read(self, size):
+                data = bytes(self.rx[:size]); del self.rx[:size]; return data
+            def write(self, data):
+                self.tx.extend(data[:3])
+                if b'\n' in self.tx:
+                    command = bytes(self.tx); self.tx.clear()
+                    if command == b'PING\n': self.rx.extend(b'READY\n')
+                    else:
+                        self.assert_command = command == b'MEASURE,12,34\n'
+                        assert self.assert_command
+                        self.samples += 1
+                        self.rx.extend(f'START,12,34,1\nDATA,12,34,0,{self.samples},-63\nDONE,12,34,1\nREADY\n'.encode())
+                return min(3,len(data))
+        with patch('serial.Serial', Port):
+            stream = serial_events('esp', 'pose', 'boot', (12,34))
+            events = [next(stream) for _ in range(4)]
+            stream.close()
+        self.assertEqual([event['type'] for event in events], ['command','rssi','command','rssi'])
+
+    def test_explicit_legacy_trigger_annotations(self):
+        self.assertEqual(measurement_command((12,34)), b'MEASURE,12,34\n')
+        for annotation in ((-1,0),(0,100001),(0,), (0.0,1)):
+            with self.assertRaises(ValueError): measurement_command(annotation)
+
     def test_alignment_rejects_float_timestamps(self):
         with self.assertRaises(ValueError): Alignment('boot', 0, float(1 << 54), 1, 1, 0)
         with self.assertRaises(ValueError): Alignment('boot', 0, 1, 1, 0, 0)
