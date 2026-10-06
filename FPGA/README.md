@@ -17,3 +17,6 @@ RTL `.sv` file. The recorded regression passes all seven testbenches; see the
 
 Physical board schematics belong in [Hardware](../Hardware/); FPGA runtime and
 implementation sources remain here.
+
+Current continuous software: [UART voxel acquisition](software/voxel/README.md).
+Current fresh verification: [results](../Development/Reports/voxel/RESULTS.md).

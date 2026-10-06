@@ -1,7 +1,7 @@
 # RF mapping ModelSim project
 
 Open **[rf_mapping.mpf](rf_mapping.mpf)** in ModelSim. It contains all six RTL
-SystemVerilog modules, all six Verilog wrappers, and all nine testbench files,
+SystemVerilog modules, all six Verilog wrappers, and all ten testbench files,
 organized into `RTL` and `Testbenches` folders. Source references are relative to
 this directory. The compiled `work/` library is generated locally and ignored by Git.
 

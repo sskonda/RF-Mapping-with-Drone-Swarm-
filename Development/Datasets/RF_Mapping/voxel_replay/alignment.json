@@ -1,0 +1,13 @@
+{
+  "drone_id": 202,
+  "frame": "synthetic_lab_enu",
+  "max_pose_age_us": 2000,
+  "alignment": {
+    "boot_id": "synthetic-boot-A",
+    "source_anchor_ms": 4294967295,
+    "common_anchor_us": 9007199254741017,
+    "rate_num": 1,
+    "rate_den": 1,
+    "uncertainty_us": 0
+  }
+}

@@ -1,0 +1,5 @@
+{"type":"pose","drone_id":202,"frame":"synthetic_lab_enu","units":"mm","clock":"aligned_common_us","boot_id":"synthetic-boot-A","position":[-1,-500,1000],"timestamp_us":9007199254741017}
+{"type":"rssi","boot_id":"synthetic-boot-A","line":"DATA,12,34,0,4294967295,-63"}
+{"type":"pose","drone_id":202,"frame":"synthetic_lab_enu","units":"mm","clock":"aligned_common_us","boot_id":"synthetic-boot-A","position":[-1,-500,1000],"timestamp_us":9007199254742017}
+{"type":"rssi","boot_id":"synthetic-boot-A","line":"DATA,12,34,1,0,-68"}
+{"type":"rssi","boot_id":"synthetic-boot-A","line":"DATA,12,34,2,5,-70"}

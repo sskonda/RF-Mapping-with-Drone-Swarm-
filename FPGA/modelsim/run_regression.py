@@ -14,6 +14,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parent
 TESTS = {
+    "tb_voxel_shared_vectors": "PASS shared vectors",
     "tb_voxel_dma_readout": "PASS all readout configurations",
     "tb_voxel_dma_pipeline": "PASS all DMA pipeline configurations",
     "axis_passthrough_tb": "PASS: all axis passthrough configurations",
@@ -39,7 +40,7 @@ def invoke(command, logfile, env=None):
         output += "\nERROR: host timeout after 120 seconds\n"
         code = 124
     logfile.write_text(output)
-    bad = re.search(r"\*\* (?:Error|Fatal):|Errors: [1-9]|Error loading design", output)
+    bad = re.search(r"\*\* (?:Error|Fatal):|Errors: [1-9]|Warnings: [1-9]|Error loading design", output)
     return output, code == 0 and bad is None
 
 
@@ -49,7 +50,17 @@ def main():
                         help="Intel install root containing modelsim_ase and modelsim_compat; "
                              "invoke vlog with its private ELF loader, bypassing PRoot")
     parser.add_argument("--seed", type=int, default=20260929)
+    parser.add_argument("--only", choices=TESTS)
+    parser.add_argument("--vectors", type=Path)
+    parser.add_argument("--no-waves", action="store_true")
+    parser.add_argument("--no-stalls", action="store_true", help="shared-vector throughput measurement")
     args = parser.parse_args()
+    if args.vectors is None:
+        args.vectors = ROOT / "logs/shared.vec"
+        args.vectors.parent.mkdir(exist_ok=True)
+        subprocess.run([sys.executable, str(ROOT.parents[1] / "Development/Tests/voxel/vectors.py"),
+                        str(args.vectors), "--seed", str(args.seed), "--count", "10000"], check=True)
+    args.vectors = args.vectors.resolve()
     logs, waves = ROOT / "logs", ROOT / "waves"
     logs.mkdir(exist_ok=True)
     waves.mkdir(exist_ok=True)
@@ -61,6 +72,10 @@ def main():
 
     version = subprocess.check_output(["vsim", "-version"], text=True).strip()
     summary["simulator"] = version
+    summary["command"] = sys.argv
+    summary["runner_sha256"] = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+    summary["head"] = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+    summary["vectors_sha256"] = hashlib.sha256(args.vectors.read_bytes()).hexdigest()
     if not (ROOT / "work").exists():
         subprocess.run(["vlib", "work"], cwd=ROOT, check=True)
     sources = sorted((ROOT.parent / "rtl").glob("*.sv"))
@@ -92,17 +107,21 @@ def main():
             print(output)
             return 1
 
-    for top, marker in TESTS.items():
+    selected = {args.only: TESTS[args.only]} if args.only else TESTS
+    for top, marker in selected.items():
+        test_started = time.monotonic()
         output, passed = invoke(
             ["vsim", "-c", "-onfinish", "stop", "-t", "1ps", "-sv_seed", str(args.seed),
              "-voptargs=+acc", "-wlf", f"waves/{top}.wlf", f"work.{top}",
-             "-do", "simulate.do"], logs / f"{top}.log")
+             f"+VECTORS={args.vectors}", f"+SEED={args.seed}",
+             "+NO_STALL" if args.no_stalls else "+RANDOM_STALLS",
+             "-do", "simulate_no_waves.do" if args.no_waves else "simulate.do"], logs / f"{top}.log")
         # ModelSim can return zero after $fatal: require the final PASS and $finish.
         passed = passed and marker in output and "** Note: $finish" in output
         details = [line.removeprefix("# ") for line in output.splitlines()
                    if line.startswith("# PASS")]
         summary["tests"].append({"top": top, "status": "PASS" if passed else "FAIL",
-                                  "details": details, "log": f"logs/{top}.log",
+                                  "duration_seconds": time.monotonic()-test_started, "details": details, "log": f"logs/{top}.log",
                                   "waveform": f"waves/{top}.wlf"})
         print(f"{'PASS' if passed else 'FAIL'} {top}", flush=True)
         if not passed:
@@ -113,7 +132,7 @@ def main():
     summary["duration_seconds"] = time.monotonic() - started
     summary["finished_utc"] = datetime.now(timezone.utc).isoformat()
     summary_path.write_text(json.dumps(summary, indent=2) + "\n")
-    print(f"{sum(t['status'] == 'PASS' for t in summary['tests'])}/{len(TESTS)} tests passed.")
+    print(f"{sum(t['status'] == 'PASS' for t in summary['tests'])}/{len(selected)} tests passed.")
     return 0 if passed else 1
 
 

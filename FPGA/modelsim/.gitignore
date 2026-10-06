@@ -9,3 +9,7 @@
 /logs/compile_probe.log
 /logs/gui*
 /logs/*.do
+
+logs/shared.vec
+waves/tb_voxel_dma*.wlf
+waves/tb_voxel_shared_vectors.wlf

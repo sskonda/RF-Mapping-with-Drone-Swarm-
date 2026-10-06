@@ -98,3 +98,9 @@ The survey lacks metadata/calibration needed for obstacle claims.
 
 See the [system architecture](../../Docs/Architecture/system_overview.md) for the
 relationship to autonomy, swarm coordination, and geometric mapping.
+
+## FPGA voxel acquisition
+
+The independent `rf-voxel` command provides UART capture, measured-pose bridging,
+exact-statistics export and sparse 3D replay. Existing `rf-mapper` commands are
+unchanged. See [setup and protocol](../../FPGA/software/voxel/README.md).

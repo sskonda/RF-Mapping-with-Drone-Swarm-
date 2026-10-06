@@ -16,6 +16,7 @@ dependencies = [
 ]
 
 [project.scripts]
+rf-voxel = "rf_mapping.voxel.cli:main"
 rf-mapper = "rf_mapping.cli.rf_mapper:main"
 
 [tool.setuptools.packages.find]

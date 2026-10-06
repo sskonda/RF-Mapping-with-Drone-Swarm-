@@ -1,3 +1,7 @@
+> Historical September 29 captures: these show the earlier four-word protocol.
+> They are not evidence for the current metadata/seven-word firmware. See
+> [fresh regression evidence](../modelsim/VERIFICATION.md).
+
 # ModelSim waveform screenshots
 
 Actual ModelSim Wave-window captures from the passing September 29, 2026 regression.
